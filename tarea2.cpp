@@ -188,7 +188,7 @@ int main(){
     while (juegoActivo) {
         mostrarHabitacion(habitacionActual);
 
-        if (habitacionActual->nombre == "Pantano") {
+        if (habitacionActual->tipo == "FIN") {
             juegoActivo = false;  // Detiene el ciclo
         }else {
             habitacionActual = elegirHabitacion(habitacionActual);
