@@ -1,4 +1,3 @@
-# T2EDD
 
 Nombre: Isidora Ogas 
 Rol: 202473654-K
