@@ -14,9 +14,9 @@ class Jugador {
 
 struct Habitacion {
     int id;
-    std::string nombre;
-    std::string tipo; // "INICIO", "EVENTO", "COMBATE", "FIN"
-    std::string descripcion;
+    string nombre;
+    string tipo; // "INICIO", "EVENTO", "COMBATE", "FIN"
+    string descripcion;
 
     // Punteros a los hijos (árbol ternario)
     Habitacion* hijo1;
@@ -27,6 +27,94 @@ struct Habitacion {
 Habitacion** habitaciones = nullptr;
 int capacidad = 0;        
 int totalHabitaciones;  
+
+void mostrarHabitacion(Habitacion* h) {
+    if (h->id == 0) {
+        cout << "-- Habitación Inicial --" << endl;
+        cout<< h->descripcion <<endl;
+    }else{
+        cout<< "-- " << h->nombre << " --" <<endl;
+        cout<< h->descripcion <<endl;
+    }
+    
+    
+    if (h->hijo1 || h->hijo2 || h->hijo3) {
+        cout << "A donde quieres ir?" << endl;
+        if (h->hijo1) {
+            cout<< "1. " << h->hijo1->nombre <<endl;
+        }
+        if (h->hijo2){
+            cout<< "2. " << h->hijo2->nombre <<endl;
+        }
+        if (h->hijo3){
+            cout<< "3. " << h->hijo3->nombre <<endl;
+        }
+        cout << "(Presiona la tecla correspondiente)" <<endl;
+    }
+}
+
+Habitacion* elegirHabitacion(Habitacion* h) {
+    int opcion;
+    cin >> opcion;
+
+    if (opcion == 1 && h->hijo1) {
+        return h->hijo1;
+    } else if (opcion == 2 && h->hijo2) {
+        return h->hijo2;
+    } else if (opcion == 3 && h->hijo3) {
+        return h->hijo3;
+    } else {
+        cout<< "Opción inválida. Intenta de nuevo." <<endl;
+        return h; // se queda en la misma habitación
+    }
+}
+
+void cargarArcos(ifstream &archivo) {
+    string linea;
+
+    // Buscar la línea "ARCOS"
+    while (getline(archivo, linea)) {
+        if (linea == "ARCOS") 
+            break;
+    }
+    // Ahora leemos la cantidad de arcos que sigue a "ARCOS"
+    getline(archivo, linea);
+    int cantidadArcos = stoi(linea);
+
+    //ELIMINAR LUEGO, SOLO PARA COMPROBAR
+    cout << "Cantidad de arcos a leer: " << cantidadArcos << endl;
+
+    for (int i = 0; i < cantidadArcos; i++) {
+
+        getline(archivo, linea);
+        stringstream arco(linea);
+        string temp;
+        // Leer origen hasta espacio
+        getline(arco, temp, ' ');
+        int origen = stoi(temp);
+
+        // Leer "->"
+        getline(arco, temp, ' '); // temp = "->"
+
+        // Leer destino
+        getline(arco, temp);
+        int destino = stoi(temp);
+
+        // Ahora conectamos origen y destino
+        Habitacion* origenHabitacion = habitaciones[origen]; //Puntero al id de habitacion
+        Habitacion* destinoHabitacion = habitaciones[destino];
+
+        // Asignar el destino al primer hijo vacío
+        if (origenHabitacion->hijo1 == nullptr) {
+            origenHabitacion->hijo1 = destinoHabitacion;
+        } else if (origenHabitacion->hijo2 == nullptr) {
+            origenHabitacion->hijo2 = destinoHabitacion;
+        } else if (origenHabitacion->hijo3 == nullptr) {
+            origenHabitacion->hijo3 = destinoHabitacion;
+        }
+    }
+
+}
 
 void cargarHabitaciones(ifstream &ejemplo) {
     if (!ejemplo.is_open()) {
@@ -47,9 +135,8 @@ void cargarHabitaciones(ifstream &ejemplo) {
 }
     //ELIMINAR LUEGO, SOLO PARA COMPROBAR
     cout << "Cantidad de habitaciones a leer: " << cantidadHabitaciones << endl;
-    cout << "Leyendo líneas de habitaciones..." << endl;
 
-    capacidad = cantidadHabitaciones;  // actualizar capacidad global
+    capacidad = cantidadHabitaciones;  
     habitaciones = new Habitacion*[capacidad];
     totalHabitaciones = 0; // inicializamos
     while (totalHabitaciones < cantidadHabitaciones) {
@@ -87,20 +174,29 @@ void cargarHabitaciones(ifstream &ejemplo) {
 int main(){
     ifstream archivo("ejemplo.map");
     if (!archivo.is_open()) {
-        cout << "No se pudo abrir el archivo ejemplo.map" << endl;
+        cout << "No se pudo abrir el archivo" << endl;
         return 0;
     }
-    cargarHabitaciones(archivo);
 
-    // Imprimir habitaciones para verificar
-    for (int i = 0; i < totalHabitaciones; i++) {
-        cout << "ID: " << habitaciones[i]->id << endl;
-        cout << "Nombre: " << habitaciones[i]->nombre << endl;
-        cout << "Tipo: " << habitaciones[i]->tipo << endl;
-        cout << "Descripcion: " << habitaciones[i]->descripcion << endl;
-        cout << "---------------------------" << endl;
+    cargarHabitaciones(archivo);
+    cargarArcos(archivo);
+    
+    Habitacion* habitacionActual = habitaciones[0]; //puntero a la habitacion inicial
+
+    bool juegoActivo = true;
+
+    while (juegoActivo) {
+        mostrarHabitacion(habitacionActual);
+
+        if (habitacionActual->nombre == "Pantano") {
+            juegoActivo = false;  // Detiene el ciclo
+        }else {
+            habitacionActual = elegirHabitacion(habitacionActual);
+            cout << endl;
+        }
     }
 
+    
     // Liberar memoria
     for (int i = 0; i < totalHabitaciones; i++) {
         delete habitaciones[i];
