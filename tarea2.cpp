@@ -40,7 +40,7 @@ void cargarHabitaciones(ifstream &ejemplo) {
     // Leer hasta encontrar el número de habitaciones
     while (getline(ejemplo, linea)) {
         stringstream numHabitaciones(linea);
-        if (numHabitaciones >> cantidadHabitaciones) { //Introducimos el numHab a la cantidad 
+        if (numHabitaciones >> cantidadHabitaciones) { //Lee y prueba si la linea tiene un num entero, si es asi se guarda en cantHab 
         // Ya encontramos el número, salimos del bucle
             break;
     }
