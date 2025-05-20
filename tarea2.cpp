@@ -25,7 +25,7 @@ struct Habitacion {
 };
 
 Habitacion** habitaciones = nullptr;
-int capacidad = 10;         // Capacidad inicial
+int capacidad = 0;        
 int totalHabitaciones = 0;  
 
 void cargarHabitaciones(ifstream &ejemplo) {
