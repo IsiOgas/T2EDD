@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream> //Para usar stringstream
+#include <string>
 using namespace std;
 
 //Structs necesarios
@@ -10,6 +11,14 @@ class Jugador {
         int ataque ;
         float precision ;
         int recuperacion ;
+};
+
+struct Enemigo {
+    string nombre;
+    int vida;
+    int ataque;
+    float precision;
+    float probabilidad;  // Probabilidad de aparecer en una habitación de combate
 };
 
 struct Habitacion {
@@ -23,9 +32,72 @@ struct Habitacion {
     Habitacion* hijo2;
     Habitacion* hijo3;
 };
+Enemigo** enemigos = nullptr;
+int totalEnemigos;
 
-Habitacion** habitaciones = nullptr;
-int capacidad = 0;        
+void cargarEnemigos(ifstream &ejemplo){
+    string linea;
+
+    // Buscar la línea "ENEMIGOS"
+    while (getline(ejemplo, linea)) {
+        if (linea =="ENEMIGOS") 
+            break;
+    }
+
+    getline(ejemplo, linea);
+    cout << "Linea que se intenta convertir a entero: '" << linea << "'" << endl;
+    int cantidadEnemigos = stoi(linea);
+    totalEnemigos=cantidadEnemigos;
+
+    enemigos = new Enemigo*[cantidadEnemigos];
+    //ELIMINAR LUEGO, SOLO PARA COMPROBAR
+    cout << "Cantidad de enemigos a leer: " << cantidadEnemigos << endl;
+
+    for (int i = 0; i < cantidadEnemigos; i++) {
+
+        getline(ejemplo, linea);
+        stringstream enemy(linea);
+        string temp;
+        
+        getline(enemy, temp, '|');
+        string nombre= temp;
+
+        getline(enemy, temp, '|'); 
+        stringstream streamVida(temp); 
+        int vida;     
+        streamVida >> temp >> vida;
+
+        getline(enemy, temp, '|');
+        stringstream streamAtaque(temp); 
+        int ataque;     
+        streamAtaque >> temp >> ataque;
+
+        getline(enemy, temp, '|');
+        stringstream streamPrecision(temp); 
+        float precision;     
+        streamPrecision >> temp >> precision;
+
+        getline(enemy, temp);
+        stringstream streamProbabilidad(temp); 
+        float probabilidad;     
+        streamProbabilidad >> temp >> probabilidad;
+        
+
+        Enemigo* e = new Enemigo();
+        e->nombre = nombre;
+        e->vida = vida;
+        e->ataque = ataque;
+        e->precision = precision;
+        e->probabilidad= probabilidad;
+
+        enemigos[i] = e;
+        
+    }
+    
+    
+}
+
+Habitacion** habitaciones = nullptr;       
 int totalHabitaciones;  
 
 void mostrarHabitacion(Habitacion* h) {
@@ -69,16 +141,16 @@ Habitacion* elegirHabitacion(Habitacion* h) {
     }
 }
 
-void cargarArcos(ifstream &archivo) {
+void cargarArcos(ifstream &ejemplo) {
     string linea;
 
     // Buscar la línea "ARCOS"
-    while (getline(archivo, linea)) {
+    while (getline(ejemplo, linea)) {
         if (linea == "ARCOS") 
             break;
     }
     // Ahora leemos la cantidad de arcos que sigue a "ARCOS"
-    getline(archivo, linea);
+    getline(ejemplo, linea);
     int cantidadArcos = stoi(linea);
 
     //ELIMINAR LUEGO, SOLO PARA COMPROBAR
@@ -86,7 +158,7 @@ void cargarArcos(ifstream &archivo) {
 
     for (int i = 0; i < cantidadArcos; i++) {
 
-        getline(archivo, linea);
+        getline(ejemplo, linea);
         stringstream arco(linea);
         string temp;
         // Leer origen hasta espacio
@@ -117,29 +189,23 @@ void cargarArcos(ifstream &archivo) {
 }
 
 void cargarHabitaciones(ifstream &ejemplo) {
-    if (!ejemplo.is_open()) {
-        cout << "No se pudo abrir el archivo." << endl;
-        return;
-    };
-
-    int cantidadHabitaciones= 0;
     string linea;
 
     // Leer hasta encontrar el número de habitaciones
     while (getline(ejemplo, linea)) {
-        stringstream numHabitaciones(linea);
-        if (numHabitaciones >> cantidadHabitaciones) { //Lee y prueba si la linea tiene un num entero, si es asi se guarda en cantHab 
-        // Ya encontramos el número, salimos del bucle
+        if (linea == "HABITACIONES") 
             break;
     }
-}
+    getline(ejemplo, linea);
+    int cantidadHabitaciones = stoi(linea);
+    totalHabitaciones=cantidadHabitaciones;
+
     //ELIMINAR LUEGO, SOLO PARA COMPROBAR
     cout << "Cantidad de habitaciones a leer: " << cantidadHabitaciones << endl;
-
-    capacidad = cantidadHabitaciones;  
-    habitaciones = new Habitacion*[capacidad];
-    totalHabitaciones = 0; // inicializamos
-    while (totalHabitaciones < cantidadHabitaciones) {
+ 
+    habitaciones = new Habitacion*[cantidadHabitaciones];
+    
+    for( int i=0; i < cantidadHabitaciones; i++) {
         
         getline(ejemplo, linea); // Leer línea completa
         stringstream cuarto(linea); // Nos permite recorrer por partes la linea que obtuvimos 
@@ -167,12 +233,13 @@ void cargarHabitaciones(ifstream &ejemplo) {
         h->descripcion = descripcion;
         h->hijo1 = h->hijo2 = h->hijo3 = nullptr;
 
-        habitaciones[totalHabitaciones++] = h;
+        habitaciones[i] = h;
     }
 }
 
 int main(){
-    ifstream archivo("ejemplo.map");
+    ifstream archivo;
+    archivo.open("ejemplo.map");
     if (!archivo.is_open()) {
         cout << "No se pudo abrir el archivo" << endl;
         return 0;
@@ -180,6 +247,7 @@ int main(){
 
     cargarHabitaciones(archivo);
     cargarArcos(archivo);
+    cargarEnemigos(archivo);
     
     Habitacion* habitacionActual = habitaciones[0]; //puntero a la habitacion inicial
 
@@ -203,5 +271,10 @@ int main(){
     }
     delete[] habitaciones;
 
+    for (int i = 0; i < totalEnemigos; i++) {
+        delete enemigos[i];
+    }   
+    delete[] enemigos;
+    
     return 0;
 }

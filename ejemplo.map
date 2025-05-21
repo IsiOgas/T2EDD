@@ -30,7 +30,7 @@ ARCOS
 5 -> 11
 5 -> 12
 5 -> 13
-ENEMIGOS 
+ENEMIGOS
 4
 Pim | Vida 10 | Ataque 2 | Precision 0.8 | Probabilidad 0.2
 Pomplin | Vida 12 | Ataque 7 | Precision 0.3 | Probabilidad 0.4
