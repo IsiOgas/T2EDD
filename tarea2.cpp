@@ -31,7 +31,15 @@ struct Habitacion {
     Habitacion* hijo1;
     Habitacion* hijo2;
     Habitacion* hijo3;
+    
+    Enemigo* enemigos[2]; //Hasta 2 enemigos por habitacion
+    bool enemigosAsignados = false;
+    int cantidadEnemigosAsignados;
 };
+
+
+
+
 Enemigo** enemigos = nullptr;
 int totalEnemigos;
 
@@ -99,11 +107,65 @@ void cargarEnemigos(ifstream &ejemplo){
 
 Habitacion** habitaciones = nullptr;       
 int totalHabitaciones;  
-
-void mostrarHabitacion(Habitacion* h) {
+ 
+void mostrarHabitacion(Habitacion* h){
     if (h->id == 0) {
         cout << "-- Habitación Inicial --" << endl;
         cout<< h->descripcion <<endl;
+    }else if (h->tipo == "COMBATE" && !h->enemigosAsignados){
+        
+        int EnemigosQueAparecen = 1 + rand() % 2; //Si aparece 1 o 2 en la habitacion
+        int EnemigoAsignado = 0;
+
+        while (EnemigoAsignado < EnemigosQueAparecen) {
+            float dado = rand() % 1000 / 1000.0f; //Genera un numero entre 0 y 1
+            float acumulado = 0; // Va sumando las prob de los enemigos 
+            for (int j = 0; j < totalEnemigos; ++j) {
+                acumulado += enemigos[j]->probabilidad;
+                if (dado <= acumulado) {
+                // Verifica que no se repita
+                    bool repetido = false;
+                    for (int i = 0; i < EnemigoAsignado; ++i) {
+                     if (h->enemigos[i] == enemigos[j]) {
+                          repetido = true;
+                         break;
+                        }
+                    }
+                    if (!repetido) {
+                    h->enemigos[EnemigoAsignado] = enemigos[j];
+                    EnemigoAsignado++;
+                    }
+                    break;
+                }
+            }   
+        }
+        h->cantidadEnemigosAsignados = EnemigoAsignado;
+        h->enemigosAsignados = true;
+
+        if (h->cantidadEnemigosAsignados == 1) {
+            cout << "¡Te enfrentas al monstruo llamado"<< h->enemigos[0]->nombre << "!" << endl;
+        } else {
+        cout << "¡Te enfrentas a dos monstruos: " << h->enemigos[0]->nombre << " y " << h->enemigos[1]->nombre << "!" << endl;
+        }
+        cout << "Jugador | ";
+        for (int i = 0; i < h->cantidadEnemigosAsignados; ++i) {
+            cout << h->enemigos[i]->nombre;
+            if (i != h->cantidadEnemigosAsignados - 1) {
+                cout << " | ";
+            }
+        }
+        cout << endl;
+
+        cout << "30      | ";
+        for (int i = 0; i < h->cantidadEnemigosAsignados; ++i) {
+            cout << h->enemigos[i]->vida;
+            if (i != h->cantidadEnemigosAsignados - 1){
+                cout << " | ";
+            }
+        }
+        
+        cout << endl;
+
     }else{
         cout<< "-- " << h->nombre << " --" <<endl;
         cout<< h->descripcion <<endl;
@@ -248,6 +310,7 @@ int main(){
     cargarHabitaciones(archivo);
     cargarArcos(archivo);
     cargarEnemigos(archivo);
+
     
     Habitacion* habitacionActual = habitaciones[0]; //puntero a la habitacion inicial
 
