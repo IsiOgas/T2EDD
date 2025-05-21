@@ -43,6 +43,18 @@ int TotalEnemigos = 0;
 
 Jugador jugador;
 
+/******
+*   void CargarHabitaciones
+******
+*   Lee las habitaciones desde un archivo y las almacena en un arreglo global.
+******
+* Input:
+*   ifstream& archivo : archivo de entrada con los datos de las habitaciones
+******
+* Returns:
+*   void, no retorna nada -> modifica la variable global ListaHabitaciones.
+*****/
+
 void CargarHabitaciones(ifstream& archivo) {
     string linea;
     while (getline(archivo, linea) && linea != "HABITACIONES");
@@ -74,6 +86,18 @@ void CargarHabitaciones(ifstream& archivo) {
     }
 }
 
+/******
+*   void CargarArcos
+******
+*   Lee los arcos entre habitaciones desde un archivo y establece los punteros hijos.
+******
+* Input:
+*   ifstream& archivo : archivo de entrada con los datos de los arcos
+******
+* Returns:
+*   void, no retorna nada -> modifica los punteros hijo1, hijo2 y hijo3 de las habitaciones
+*****/
+
 void CargarArcos(ifstream& archivo) {
     string linea;
     while (getline(archivo, linea) && linea != "ARCOS");
@@ -99,6 +123,18 @@ void CargarArcos(ifstream& archivo) {
     }
 }
 
+/******
+*   Habitacion* ElegirHabitacion
+******
+*   Permite al usuario elegir una de las habitaciones hijas disponibles para moverse.
+******
+* Input:
+*   Habitacion* h : puntero a la habitación actual
+******
+* Returns:
+*   Habitacion* : puntero a la habitación elegida por el usuario, o la misma habitación si la opción es inválida.
+*****/
+
 Habitacion* ElegirHabitacion(Habitacion* h) {
     int opcion;
     cout << "Elige una opción: ";
@@ -113,6 +149,18 @@ Habitacion* ElegirHabitacion(Habitacion* h) {
     }
 }
 
+/******
+*   void mostrarHabitacion
+******
+*   Muestra la información de la habitación actual por consola.
+******
+* Input:
+*   Habitacion* h : puntero a la habitación que se desea mostrar
+******
+* Returns:
+*   void, solo muestra información en pantalla
+*****/
+
 void mostrarHabitacion(Habitacion* h) {
     cout << "\nEstás en: " << h->nombre << endl;
     cout << h->descripcion << endl;
@@ -121,6 +169,8 @@ void mostrarHabitacion(Habitacion* h) {
     if (h->hijo2) cout << "2. Ir a " << h->hijo2->nombre << endl;
     if (h->hijo3) cout << "3. Ir a " << h->hijo3->nombre << endl;
 }
+
+
 
 int main() {
     ifstream archivo("ejemplo.map");
