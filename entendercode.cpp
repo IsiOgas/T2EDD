@@ -101,7 +101,7 @@ void CargarArcos(ifstream& archivo) {
 
 Habitacion* ElegirHabitacion(Habitacion* h) {
     int opcion;
-    cout << "Elige una opción (1, 2 o 3): ";
+    cout << "Elige una opción: ";
     cin >> opcion;
 
     if (opcion == 1 && h->hijo1) return h->hijo1;
