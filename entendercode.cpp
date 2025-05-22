@@ -172,15 +172,51 @@ void mostrarHabitacion(Habitacion* h) {
 
 void MostarEnemigos(ifstream& archivo){
     string linea;
-    while(getline(archivo,linea) && linea != "ENEMIGOS"){
-        get(archivo,linea);
-        TotalEnemigos = stoi(linea);
+    while(getline(archivo,linea) && linea != "ENEMIGOS");
+    getline(archivo,linea);
+    TotalEnemigos = stoi(linea);
+    ListaEnemigos = new Enemigo*[TotalEnemigos];
         
-        for(int i = 0; i < TotalEnemigos;i++){
-            
-        }
+    for(int i = 0; i < TotalEnemigos;i++){
+        getline(archivo, linea);
+        stringstream enemy(linea);
+        string dato;
+        
+        getline(enemy, dato, '|'); //->lee esto "Pim "
+        string nombre = dato;
+
+        getline(enemy, dato, '|');  //-> lee esto " Vida 10 " -> ajustar esto ! solo leer valor ej "10". 
+        stringstream streamVida(dato); 
+        int vida;     
+        streamVida >> dato >> vida;
+
+        getline(enemy, dato, '|');
+        stringstream streamAtaque(dato); 
+        int ataque;     
+        streamAtaque >> dato >> ataque;
+
+        getline(enemy, dato, '|');
+        stringstream streamPrecision(dato); 
+        float precision;     
+        streamPrecision >> dato >> precision;
+
+        getline(enemy, dato);
+        stringstream streamProbabilidad(dato); 
+        float probabilidad;     
+        streamProbabilidad >> dato >> probabilidad;
+        
+
+        Enemigo* e = new Enemigo();
+        e->nombre = nombre;
+        e->vida = vida;
+        e->ataque = ataque;
+        e->precision = precision;
+        e->probabilidad= probabilidad;
+
+        enemigos[i] = e;    
     }
 }
+
 
 void AsignarEnemigos(Habitacion* habitacion){
     if(Habitacion->tipo == "COMBATE"){
