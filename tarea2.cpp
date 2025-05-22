@@ -7,11 +7,34 @@ using namespace std;
 //Structs necesarios
 class Jugador {
     private :
-        int vida ;
-        int ataque ;
-        float precision ;
-        int recuperacion ;
+        int vida;
+        int ataque;
+        float precision;
+        int recuperacion;
+    public:
+    // Constructor para inicializar
+    Jugador(){
+        
+        vida = 100;
+        ataque = 7;
+        precision = 0.8;
+        recuperacion = 5;
+    }
+    
+
+    // Getters
+    int getVida() { return vida; }
+    int getAtaque() { return ataque; }
+    float getPrecision() { return precision; }
+    int getRecuperacion() { return recuperacion; }
+    bool estaVivo() { return vida > 0; }
+    // Setters
+    void setVida(int v) { vida = v; }
+    void setAtaque(int a) { ataque = a; }
+    void setRecuperacion(int r) { recuperacion = r; }
+
 };
+
 
 struct Enemigo {
     string nombre;
@@ -40,6 +63,7 @@ struct Habitacion {
 
 
 
+
 Enemigo** enemigos = nullptr;
 int totalEnemigos;
 
@@ -47,21 +71,16 @@ void cargarEnemigos(ifstream &ejemplo){
     string linea;
 
     // Buscar la línea "ENEMIGOS"
-    while (getline(ejemplo, linea)) {
-        if (linea =="ENEMIGOS") 
-            break;
-    }
+    while (getline(ejemplo, linea) && linea != "ENEMIGOS");
 
     getline(ejemplo, linea);
-    cout << "Linea que se intenta convertir a entero: '" << linea << "'" << endl;
-    int cantidadEnemigos = stoi(linea);
-    totalEnemigos=cantidadEnemigos;
+    totalEnemigos = stoi(linea);
 
-    enemigos = new Enemigo*[cantidadEnemigos];
+    enemigos = new Enemigo*[totalEnemigos];
     //ELIMINAR LUEGO, SOLO PARA COMPROBAR
-    cout << "Cantidad de enemigos a leer: " << cantidadEnemigos << endl;
+    cout << "Cantidad de enemigos a leer: " << totalEnemigos << endl;
 
-    for (int i = 0; i < cantidadEnemigos; i++) {
+    for (int i = 0; i < totalEnemigos; i++) {
 
         getline(ejemplo, linea);
         stringstream enemy(linea);
@@ -100,15 +119,75 @@ void cargarEnemigos(ifstream &ejemplo){
 
         enemigos[i] = e;
         
-    }
-    
+    }  
     
 }
 
-Habitacion** habitaciones = nullptr;       
-int totalHabitaciones;  
- 
-void mostrarHabitacion(Habitacion* h){
+
+bool hayEnemigosVivos(Habitacion* h) {
+    for (int i = 0; i < h->cantidadEnemigosAsignados; i++) {
+        if (h->enemigos[i]->vida > 0) return true;
+    }
+    return false;
+}
+
+void mostrarEstado(Jugador& jugador, Habitacion* h) {
+    // Mostrar nombres
+    cout << "Jugador";
+    for (int i = 0; i < h->cantidadEnemigosAsignados; ++i) {
+        cout << " | " << h->enemigos[i]->nombre;
+    }
+    cout << endl;
+
+    // Mostrar vida
+    cout << jugador.getVida();
+    for (int i = 0; i < h->cantidadEnemigosAsignados; ++i) {
+        cout << " | " << h->enemigos[i]->vida;
+    }
+    cout << endl;
+}
+
+
+bool intentoAtaque(float precision) {
+    float dado = (rand() % 1000) / 1000.0f;  // número entre 0.0 y 0.999
+    return dado <= precision;
+}
+
+void turnoCombate(Jugador& jugador, Habitacion* h) {
+    while (jugador.estaVivo() && hayEnemigosVivos(h)) {
+        // Turno jugador ataca primer enemigo vivo
+        for (int i = 0; i < h->cantidadEnemigosAsignados; i++) {
+            if (h->enemigos[i]->vida > 0) {
+                if (intentoAtaque(jugador.getPrecision())) {
+                    int danio = jugador.getAtaque();
+                    h->enemigos[i]->vida -= danio;
+                    cout << "Jugador golpea a " << h->enemigos[i]->nombre << " por " << danio << " de daño!" << endl;
+                } else {
+                    cout << "Jugador falla el ataque a " << h->enemigos[i]->nombre << "!" << endl;
+                }
+                break;  // Solo ataca a un enemigo por turno
+            }
+        }
+
+        // Turno enemigos atacan jugador
+        for (int i = 0; i < h->cantidadEnemigosAsignados; i++) {
+            if (h->enemigos[i]->vida > 0) {
+                if (intentoAtaque(h->enemigos[i]->precision)) {
+                    int danio = h->enemigos[i]->ataque;
+                    jugador.setVida(jugador.getVida() - danio);
+                    cout << h->enemigos[i]->nombre << " golpea al Jugador por " << danio << " de daño!" << endl;
+                } else {
+                    cout << h->enemigos[i]->nombre << " falla el ataque!" << endl;
+                }
+            }
+        }
+
+        mostrarEstado(jugador, h);
+        cout << endl;
+    }
+}
+
+void mostrarHabitacion(Habitacion* h, Jugador& jugador){
     if (h->id == 0) {
         cout << "-- Habitación Inicial --" << endl;
         cout<< h->descripcion <<endl;
@@ -165,6 +244,7 @@ void mostrarHabitacion(Habitacion* h){
         }
         
         cout << endl;
+        turnoCombate(jugador, h);
 
     }else{
         cout<< "-- " << h->nombre << " --" <<endl;
@@ -203,36 +283,82 @@ Habitacion* elegirHabitacion(Habitacion* h) {
     }
 }
 
+
+Habitacion** habitaciones = nullptr;       
+int totalHabitaciones;
+
+void cargarHabitaciones(ifstream &ejemplo) {
+    string linea;
+    
+    // Leer hasta encontrar el número de habitaciones
+    while (getline(ejemplo, linea) && linea != "HABITACIONES");
+    
+    getline(ejemplo, linea);
+    
+    
+
+    totalHabitaciones = stoi(linea);
+
+    //ELIMINAR LUEGO, SOLO PARA COMPROBAR
+    cout << "Cantidad de habitaciones a leer: " << totalHabitaciones << endl;
+ 
+    habitaciones = new Habitacion*[totalHabitaciones];
+    
+    for( int i=0; i < totalHabitaciones; i++) {
+        
+        getline(ejemplo, linea); // Leer línea completa
+        stringstream cuarto(linea); // Nos permite recorrer por partes la linea que obtuvimos 
+        string dato; //Declaramos variable donde se ira guardando cada valor que se extrae
+        // Crear y guardar la habitación
+        habitaciones[i] = new Habitacion();
+        // Leer los campos separados por ';'
+        getline(cuarto, dato, ';');
+        habitaciones[i]->id = stoi(dato); //Convierte el id de string a int
+
+        getline(cuarto, dato, ';');
+        habitaciones[i]->nombre = dato;
+
+        getline(cuarto, dato, ';');
+        habitaciones[i]->tipo = dato;
+
+        getline(cuarto, dato);
+        habitaciones[i]->descripcion = dato;
+
+
+        habitaciones[i]->hijo1 = habitaciones[i]->hijo2 = habitaciones[i]->hijo3 = nullptr;  
+    }
+}
+
+
+
+int totalArcos;
 void cargarArcos(ifstream &ejemplo) {
+
     string linea;
 
     // Buscar la línea "ARCOS"
-    while (getline(ejemplo, linea)) {
-        if (linea == "ARCOS") 
-            break;
-    }
+    while (getline(ejemplo, linea) && linea != "ARCOS");
     // Ahora leemos la cantidad de arcos que sigue a "ARCOS"
     getline(ejemplo, linea);
-    int cantidadArcos = stoi(linea);
+    totalArcos = stoi(linea);
 
     //ELIMINAR LUEGO, SOLO PARA COMPROBAR
-    cout << "Cantidad de arcos a leer: " << cantidadArcos << endl;
+    cout << "Cantidad de arcos a leer: " << totalArcos << endl;
 
-    for (int i = 0; i < cantidadArcos; i++) {
-
+    for (int i = 0; i < totalArcos; i++) {
         getline(ejemplo, linea);
         stringstream arco(linea);
-        string temp;
+        string dato;
         // Leer origen hasta espacio
-        getline(arco, temp, ' ');
-        int origen = stoi(temp);
+        getline(arco, dato, ' ');
+        int origen = stoi(dato);
 
         // Leer "->"
-        getline(arco, temp, ' '); // temp = "->"
+        getline(arco, dato, ' '); // temp = "->"
 
         // Leer destino
-        getline(arco, temp);
-        int destino = stoi(temp);
+        getline(arco, dato);
+        int destino = stoi(dato);
 
         // Ahora conectamos origen y destino
         Habitacion* origenHabitacion = habitaciones[origen]; //Puntero al id de habitacion
@@ -249,56 +375,7 @@ void cargarArcos(ifstream &ejemplo) {
     }
 
 }
-
-void cargarHabitaciones(ifstream &ejemplo) {
-    string linea;
-
-    // Leer hasta encontrar el número de habitaciones
-    while (getline(ejemplo, linea)) {
-        if (linea == "HABITACIONES") 
-            break;
-    }
-    getline(ejemplo, linea);
-    int cantidadHabitaciones = stoi(linea);
-    totalHabitaciones=cantidadHabitaciones;
-
-    //ELIMINAR LUEGO, SOLO PARA COMPROBAR
-    cout << "Cantidad de habitaciones a leer: " << cantidadHabitaciones << endl;
- 
-    habitaciones = new Habitacion*[cantidadHabitaciones];
-    
-    for( int i=0; i < cantidadHabitaciones; i++) {
-        
-        getline(ejemplo, linea); // Leer línea completa
-        stringstream cuarto(linea); // Nos permite recorrer por partes la linea que obtuvimos 
-        string temp; //Declaramos variable donde se ira guardando cada valor que se extrae
-
-        // Leer los campos separados por ';'
-        getline(cuarto, temp, ';');
-        int id = stoi(temp); //Convierte el id de string a int
-
-        getline(cuarto, temp, ';');
-        string nombre = temp;
-
-        getline(cuarto, temp, ';');
-        // Remover los paréntesis del tipo
-        string tipo = temp;
-
-        getline(cuarto, temp); // descripción
-        string descripcion = temp;
-
-        // Crear y guardar la habitación
-        Habitacion* h = new Habitacion();
-        h->id = id;
-        h->nombre = nombre;
-        h->tipo = tipo;
-        h->descripcion = descripcion;
-        h->hijo1 = h->hijo2 = h->hijo3 = nullptr;
-
-        habitaciones[i] = h;
-    }
-}
-
+Jugador jugador;
 int main(){
     ifstream archivo;
     archivo.open("ejemplo.map");
@@ -317,7 +394,7 @@ int main(){
     bool juegoActivo = true;
 
     while (juegoActivo) {
-        mostrarHabitacion(habitacionActual);
+        mostrarHabitacion(habitacionActual, jugador);
 
         if (habitacionActual->tipo == "FIN") {
             juegoActivo = false;  // Detiene el ciclo

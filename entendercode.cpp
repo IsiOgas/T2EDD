@@ -59,7 +59,7 @@ void CargarHabitaciones(ifstream& archivo) {
     string linea;
     while (getline(archivo, linea) && linea != "HABITACIONES");
     getline(archivo, linea);
-    TotalHabitaciones = stoi(linea);
+    TotalHabitaciones = stoi(linea  );
     string dato;
     ListaHabitaciones = new Habitacion*[TotalHabitaciones];
 
