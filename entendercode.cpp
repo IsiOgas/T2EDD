@@ -170,6 +170,26 @@ void mostrarHabitacion(Habitacion* h) {
     if (h->hijo3) cout << "3. Ir a " << h->hijo3->nombre << endl;
 }
 
+void MostarEnemigos(ifstream& archivo){
+    string linea;
+    while(getline(archivo,linea) && linea != "ENEMIGOS"){
+        get(archivo,linea);
+        TotalEnemigos = stoi(linea);
+        
+        for(int i = 0; i < TotalEnemigos;i++){
+            
+        }
+    }
+}
+
+void AsignarEnemigos(Habitacion* habitacion){
+    if(Habitacion->tipo == "COMBATE"){
+        for(int i = 0; i < TotalEnemigos; i++){
+
+        }
+    }
+}
+
 
 
 int main() {
