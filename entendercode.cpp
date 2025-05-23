@@ -170,6 +170,10 @@ void mostrarHabitacion(Habitacion* h) {
     if (h->hijo3) cout << "3. Ir a " << h->hijo3->nombre << endl;
 }
 
+
+/**probar esto, creo q no funciona khajhsjd */
+
+
 void MostarEnemigos(ifstream& archivo){
     string linea;
     while(getline(archivo,linea) && linea != "ENEMIGOS");
@@ -183,39 +187,35 @@ void MostarEnemigos(ifstream& archivo){
         Enemigo* e = new Enemigo();
         string cursor; 
 
-        getline(enemy, e->nombre, '|'); //Este queda como "Pim ", no se si habrá problema luego.
+        getline(enemy, e->nombre, '|');
 
-        while(enemy >> cursor && cursor != "Vida" );
+        while(enemy >> cursor && cursor !='Vida');
         int vida;
         enemy >> vida;
         e->vida = vida;
 
-        while(enemy >> cursor && cursor != "Ataque");
+        while(enemy >> cursor && cursor != 'Ataque');
         int ataque;
         enemy >> ataque;
         e->ataque = ataque;
 
-        while(enemy >> cursor && cursor != "Precision");
+        while(enemy >> cursor && cursor !='Precision');
         float precision;
         enemy >> precision;
         e->precision = precision;
 
-        while(enemy >> cursor && cursor != "Probabilidad");
+        while(enemy >> cursor && cursor !='Probabilidad');
         float probabilidad;
         enemy >> probabilidad; 
         e->probabilidad = probabilidad;
-            
+        
+        ListaEnemigos[i] = e;
     }
 }
 
+/**probar esto, creo q no funciona khajhsjd */
 
-void AsignarEnemigos(Habitacion* habitacion){
-    if(Habitacion->tipo == "COMBATE"){
-        for(int i = 0; i < TotalEnemigos; i++){
 
-        }
-    }
-}
 
 
 

@@ -89,7 +89,7 @@ void cargarEnemigos(ifstream &ejemplo){
         getline(enemy, temp, '|');
         string nombre= temp;
 
-        getline(enemy, temp, '|'); //-> lee esto " Vida 10 " -> ajustar esto ! solo leer valor ej "10". pasa eso en todos para abajo !
+        getline(enemy, temp, '|'); //-> lee esto " Vida 10 " -> ajustar esto ! solo leer valor ej "10". pasa eso en todos para abajo
         stringstream streamVida(temp); 
         int vida;     
         streamVida >> temp >> vida;
