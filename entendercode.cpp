@@ -171,6 +171,35 @@ void mostrarHabitacion(Habitacion* h) {
     if (h->hijo3) cout << "3. Ir a " << h->hijo3->nombre << endl;
 }
 
+void CargarEnemigos(ifstream& archivo){
+    string linea;
+    while(getline(archivo,linea) && linea != "ENEMIGOS");
+    getline(archivo,linea);
+    TotalEnemigos = stoi(linea);
+    ListaEnemigos = new Enemigo*[TotalEnemigos];
+        
+    for(int i = 0; i < TotalEnemigos;i++){
+        getline(archivo, linea);
+        stringstream enemy(linea);
+        Enemigo* e = new Enemigo();
+        string cursor; 
+
+        getline(enemy, e->nombre, '|');
+
+        while (enemy >> cursor) {
+            if (cursor == "Vida") {
+                enemy >> e->vida;
+            } else if (cursor == "Ataque") {
+                enemy >> e->ataque;
+            } else if (cursor == "Precision") {
+                enemy >> e->precision;
+            } else if (cursor == "Probabilidad") {
+                enemy >> e->probabilidad;
+            }
+        }
+        ListaEnemigos[i] = e;
+    }
+}
 
 void AparicionEnemigos(Habitacion* H){
     if (H->tipo == "COMBATE" && !H->enemigosAsignados){
@@ -210,6 +239,7 @@ int main() {
 
     CargarHabitaciones(archivo);
     CargarArcos(archivo);
+    CargarEnemigos(archivo);
 
     Habitacion* habitacionActual = ListaHabitaciones[0];
     bool JuegoActivo = true;
