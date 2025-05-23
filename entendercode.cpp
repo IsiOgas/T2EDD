@@ -171,10 +171,7 @@ void mostrarHabitacion(Habitacion* h) {
 }
 
 
-/**probar esto, creo q no funciona khajhsjd */
-
-
-void MostarEnemigos(ifstream& archivo){
+void CargarEnemigos(ifstream& archivo){
     string linea;
     while(getline(archivo,linea) && linea != "ENEMIGOS");
     getline(archivo,linea);
@@ -189,33 +186,22 @@ void MostarEnemigos(ifstream& archivo){
 
         getline(enemy, e->nombre, '|');
 
-        while(enemy >> cursor && cursor !='Vida');
-        int vida;
-        enemy >> vida;
-        e->vida = vida;
-
-        while(enemy >> cursor && cursor != 'Ataque');
-        int ataque;
-        enemy >> ataque;
-        e->ataque = ataque;
-
-        while(enemy >> cursor && cursor !='Precision');
-        float precision;
-        enemy >> precision;
-        e->precision = precision;
-
-        while(enemy >> cursor && cursor !='Probabilidad');
-        float probabilidad;
-        enemy >> probabilidad; 
-        e->probabilidad = probabilidad;
-        
+        while (enemy >> cursor) {
+            if (cursor == "Vida") {
+                enemy >> e->vida;
+            } else if (cursor == "Ataque") {
+                enemy >> e->ataque;
+            } else if (cursor == "Precision") {
+                enemy >> e->precision;
+            } else if (cursor == "Probabilidad") {
+                enemy >> e->probabilidad;
+            }
+        }
         ListaEnemigos[i] = e;
     }
 }
 
-/**probar esto, creo q no funciona khajhsjd */
-
-
+void
 
 
 
@@ -227,6 +213,7 @@ int main() {
     }
 
     CargarHabitaciones(archivo);
+    CargarEnemigos(archivo);
     CargarArcos(archivo);
 
     Habitacion* habitacionActual = ListaHabitaciones[0];
