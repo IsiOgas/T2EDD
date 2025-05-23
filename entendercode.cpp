@@ -180,40 +180,31 @@ void MostarEnemigos(ifstream& archivo){
     for(int i = 0; i < TotalEnemigos;i++){
         getline(archivo, linea);
         stringstream enemy(linea);
-        string dato;
-        
-        getline(enemy, dato, '|'); //->lee esto "Pim "
-        string nombre = dato;
-
-        getline(enemy, dato, '|');  //-> lee esto " Vida 10 " -> ajustar esto ! solo leer valor ej "10". 
-        stringstream streamVida(dato); 
-        int vida;     
-        streamVida >> dato >> vida;
-
-        getline(enemy, dato, '|');
-        stringstream streamAtaque(dato); 
-        int ataque;     
-        streamAtaque >> dato >> ataque;
-
-        getline(enemy, dato, '|');
-        stringstream streamPrecision(dato); 
-        float precision;     
-        streamPrecision >> dato >> precision;
-
-        getline(enemy, dato);
-        stringstream streamProbabilidad(dato); 
-        float probabilidad;     
-        streamProbabilidad >> dato >> probabilidad;
-        
-
         Enemigo* e = new Enemigo();
-        e->nombre = nombre;
-        e->vida = vida;
-        e->ataque = ataque;
-        e->precision = precision;
-        e->probabilidad= probabilidad;
+        string cursor; 
 
-        enemigos[i] = e;    
+        getline(enemy, e->nombre, '|'); //Este queda como "Pim ", no se si habrá problema luego.
+
+        while(enemy >> cursor && cursor != "Vida" );
+        int vida;
+        enemy >> vida;
+        e->vida = vida;
+
+        while(enemy >> cursor && cursor != "Ataque");
+        int ataque;
+        enemy >> ataque;
+        e->ataque = ataque;
+
+        while(enemy >> cursor && cursor != "Precision");
+        float precision;
+        enemy >> precision;
+        e->precision = precision;
+
+        while(enemy >> cursor && cursor != "Probabilidad");
+        float probabilidad;
+        enemy >> probabilidad; 
+        e->probabilidad = probabilidad;
+            
     }
 }
 
