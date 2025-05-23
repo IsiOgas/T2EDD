@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cstdlib>
 using namespace std;
 
 class Jugador {
@@ -171,49 +172,43 @@ void mostrarHabitacion(Habitacion* h) {
 }
 
 
-void CargarEnemigos(ifstream& archivo){
-    string linea;
-    while(getline(archivo,linea) && linea != "ENEMIGOS");
-    getline(archivo,linea);
-    TotalEnemigos = stoi(linea);
-    ListaEnemigos = new Enemigo*[TotalEnemigos];
-        
-    for(int i = 0; i < TotalEnemigos;i++){
-        getline(archivo, linea);
-        stringstream enemy(linea);
-        Enemigo* e = new Enemigo();
-        string cursor; 
+void AparicionEnemigos(Habitacion* H){
+    if (H->tipo == "COMBATE" && !H->enemigosAsignados){
+        int Cantidad;
+        if (rand() % 2 == 0) { //entre 0 y 32767
+            Cantidad = 1;
+        } else {
+            Cantidad = 2;
+        }
 
-        getline(enemy, e->nombre, '|');
+        H->cantidadEnemigosAsignados = 0;
+        for (int i = 0; i < TotalEnemigos && H->cantidadEnemigosAsignados < Cantidad; i++) {
+            Enemigo* e = ListaEnemigos[i];
 
-        while (enemy >> cursor) {
-            if (cursor == "Vida") {
-                enemy >> e->vida;
-            } else if (cursor == "Ataque") {
-                enemy >> e->ataque;
-            } else if (cursor == "Precision") {
-                enemy >> e->precision;
-            } else if (cursor == "Probabilidad") {
-                enemy >> e->probabilidad;
+            if (e->vida > 0) {
+                H->enemigos[H->cantidadEnemigosAsignados] = e;
+                H->cantidadEnemigosAsignados++;
             }
         }
-        ListaEnemigos[i] = e;
+        H->enemigosAsignados = true;
     }
 }
 
-void
-
-
+bool hayEnemigosVivos(Habitacion* h) {
+    for (int i = 0; i < h->cantidadEnemigosAsignados; i++) {
+        if (h->enemigos[i]->vida > 0) return true;
+    }
+    return false;
+}
 
 int main() {
     ifstream archivo("ejemplo.map");
     if (!archivo.is_open()) {
-        cerr << "Error: No se pudo abrir el archivo ejemplo.map" << endl;
+        cerr << "Error: No se pudo abrir el archivo." << endl;
         return 1;
     }
 
     CargarHabitaciones(archivo);
-    CargarEnemigos(archivo);
     CargarArcos(archivo);
 
     Habitacion* habitacionActual = ListaHabitaciones[0];
@@ -221,6 +216,7 @@ int main() {
 
     while (JuegoActivo) {
         mostrarHabitacion(habitacionActual);
+        AparicionEnemigos(habitacionActual);
 
         if (habitacionActual->tipo == "FIN") {
             cout << "\n╔══════════════════════════════╗\n";
