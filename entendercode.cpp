@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <cstdlib>
+#include <ctime>
 using namespace std;
 
 class Jugador {
@@ -171,6 +172,8 @@ void mostrarHabitacion(Habitacion* h) {
     if (h->hijo3) cout << "3. Ir a " << h->hijo3->nombre << endl;
 }
 
+
+
 void CargarEnemigos(ifstream& archivo){
     string linea;
     while(getline(archivo,linea) && linea != "ENEMIGOS");
@@ -200,6 +203,8 @@ void CargarEnemigos(ifstream& archivo){
         ListaEnemigos[i] = e;
     }
 }
+
+
 
 void AparicionEnemigos(Habitacion* H){
     if (H->tipo == "COMBATE" && !H->enemigosAsignados){
@@ -247,6 +252,18 @@ int main() {
     while (JuegoActivo) {
         mostrarHabitacion(habitacionActual);
         AparicionEnemigos(habitacionActual);
+
+        if (habitacionActual->cantidadEnemigosAsignados > 0) {
+        cout << "Enemigos en esta habitación:" << endl;
+            for (int i = 0; i < habitacionActual->cantidadEnemigosAsignados; i++) {
+                Enemigo* e = habitacionActual->enemigos[i];
+                cout << "- " << e->nombre 
+                 << " (Vida: " << e->vida 
+                 << ", Ataque: " << e->ataque
+                 << ", Precisión: " << e->precision 
+                 << ", Probabilidad: " << e->probabilidad << ")" << endl;
+             }
+        }
 
         if (habitacionActual->tipo == "FIN") {
             cout << "\n╔══════════════════════════════╗\n";
