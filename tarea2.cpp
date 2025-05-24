@@ -12,14 +12,15 @@ class Jugador {
         float precision;
         int recuperacion;
     public:
-    // Constructor para inicializar
-    Jugador(){
+     // Constructor para inicializar
+        Jugador(){
         
-        vida = 100;
-        ataque = 7;
-        precision = 0.8;
-        recuperacion = 5;
-    }
+            vida = 100;
+            ataque = 7;
+            precision = 0.8;
+            recuperacion = 5;
+        }
+    
     
 
     // Getters
@@ -34,6 +35,69 @@ class Jugador {
     void setRecuperacion(int r) { recuperacion = r; }
 
 };
+struct Nodo {
+    string nombreTurno;  // Puede ser "jugador" o el nombre de un enemigo
+    Nodo* sig;
+};
+//funciones para TDA Cola
+class TDACola {
+    private:
+        Nodo* head;
+        Nodo* tail;
+        Nodo* curr;
+        unsigned int listSize;
+        unsigned int pos; // posicion actual en la lista
+    public:
+    // métodos de la clase
+        TDACola(){ // constructor
+            head=nullptr;
+            tail=nullptr;
+            listSize=0; 
+        }          
+        bool vacia(){ return head == nullptr; }
+        
+        void encolar(string nombre){
+            Nodo* nuevo = new Nodo;
+            nuevo->nombreTurno = nombre;
+            nuevo->sig = nullptr;
+
+            if (vacia()) {
+                head = tail = nuevo;
+            } else {
+                tail->sig = nuevo;
+                tail = nuevo;
+            }
+
+            listSize++;
+        }
+        string desencolar(){
+            if (vacia()) {
+                return ""; // o lanzar un error
+            }
+
+            Nodo* temp = head;
+            string nombre = temp->nombreTurno;
+
+            head = head->sig;
+            if (head == nullptr) {
+                tail = nullptr;
+            }
+
+            delete temp;
+            listSize--;
+
+            return nombre;
+        }
+        
+        string TurnoSgte(){
+            if (!vacia()) {
+                return head->nombreTurno;
+            }
+            return "";
+        }
+        
+};
+
 
 
 struct Enemigo {
@@ -59,6 +123,10 @@ struct Habitacion {
     bool enemigosAsignados = false;
     int cantidadEnemigosAsignados;
 };
+
+
+
+
 
 
 
@@ -154,45 +222,71 @@ bool intentoAtaque(float precision) {
 }
 
 void turnoCombate(Jugador& jugador, Habitacion* h) {
-    while (jugador.estaVivo() && hayEnemigosVivos(h)) {
-        // Turno jugador ataca primer enemigo vivo
-        for (int i = 0; i < h->cantidadEnemigosAsignados; i++) {
-            if (h->enemigos[i]->vida > 0) {
-                if (intentoAtaque(jugador.getPrecision())) {
-                    int danio = jugador.getAtaque();
-                    h->enemigos[i]->vida -= danio;
-                    cout << "Jugador golpea a " << h->enemigos[i]->nombre << " por " << danio << " de daño!" << endl;
-                } else {
-                    cout << "Jugador falla el ataque a " << h->enemigos[i]->nombre << "!" << endl;
-                }
-                break;  // Solo ataca a un enemigo por turno
-            }
-        }
+    TDACola colaTurnos;
 
-        // Turno enemigos atacan jugador
-        for (int i = 0; i < h->cantidadEnemigosAsignados; i++) {
-            if (h->enemigos[i]->vida > 0) {
-                if (intentoAtaque(h->enemigos[i]->precision)) {
-                    int danio = h->enemigos[i]->ataque;
-                    jugador.setVida(jugador.getVida() - danio);
-                    cout << h->enemigos[i]->nombre << " golpea al Jugador por " << danio << " de daño!" << endl;
-                } else {
-                    cout << h->enemigos[i]->nombre << " falla el ataque!" << endl;
-                }
-            }
-        }
+    // Encolar jugador
+    colaTurnos.encolar("Jugador");
 
-        mostrarEstado(jugador, h);
-        cout << endl;
+    // Encolar enemigos (por nombre)
+    for (int i = 0; i < h->cantidadEnemigosAsignados; i++) {
+        colaTurnos.encolar(h->enemigos[i]->nombre);
     }
+
+   while (jugador.getVida() > 0 && hayEnemigosVivos(h)) {
+        string turnoActual = colaTurnos.TurnoSgte();
+
+        if (turnoActual == "Jugador") {
+            for (int i = 0; i < h->cantidadEnemigosAsignados; i++) {
+                if (h->enemigos[i]->vida > 0) {
+                    int prob = rand() % 100;
+                    if ((rand() % 1000) / 1000.0f <= jugador.getPrecision()) {
+                        h->enemigos[i]->vida -= jugador.getAtaque();
+                        if ((rand() % 1000) / 1000.0f <= h->enemigos[i]->precision) {
+
+                            cout << "Jugador golpea a " << h->enemigos[i]->nombre << " por " << jugador.getAtaque() << " de da ~n o !\n";
+                        } else {
+                        cout << "Jugador falla !\n";
+                    }
+                    break;
+                }
+            }
+        } else {
+            for (int i = 0; i < h->cantidadEnemigosAsignados; i++) {
+                if (h->enemigos[i]->nombre == turnoActual && h->enemigos[i]->vida > 0) {
+                    int prob = rand() % 100;
+                    if (prob < h->enemigos[i]->precision) {
+                        int nuevaVida = jugador.getVida() - h->enemigos[i]->ataque;
+                        if (nuevaVida < 0) nuevaVida = 0;
+                        jugador.setVida(nuevaVida);
+                        cout << h->enemigos[i]->nombre << " golpea a Jugador por " << h->enemigos[i]->ataque << " de da ~n o !\n";
+                    } else {
+                        cout << h->enemigos[i]->nombre << " falla !\n";
+                    }
+                }
+            }
+        }
+
+        mostrarEstado(jugador, h); // Corrige el llamado
+        colaTurnos.encolar(turnoActual);
+    }
+
+    if (jugador.getVida() > 0)
+        cout << "¡Ganaste el combate!\n";
+    else
+        cout << "Has sido derrotado...\n";
+
 }
+
+
+
 
 void mostrarHabitacion(Habitacion* h, Jugador& jugador){
     if (h->id == 0) {
         cout << "-- Habitación Inicial --" << endl;
         cout<< h->descripcion <<endl;
     }else if (h->tipo == "COMBATE" && !h->enemigosAsignados){
-        
+        mostrarEstado(jugador, h);
+
         int EnemigosQueAparecen = 1 + rand() % 2; //Si aparece 1 o 2 en la habitacion
         int EnemigoAsignado = 0;
 
