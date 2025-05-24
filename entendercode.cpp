@@ -37,11 +37,25 @@ struct Habitacion {
     int cantidadEnemigosAsignados;
 };
 
+struct Evento {
+    string nombre;
+    float probabilidad;
+    string descripcion;
+    string opcion_A;
+    string resultado_A;
+    string opcion_B;
+    string resultado_B;
+};
+
+
 Habitacion** ListaHabitaciones = nullptr;
 int TotalHabitaciones = 0;
 
 Enemigo** ListaEnemigos = nullptr;
 int TotalEnemigos = 0;
+
+Evento** ListaEventos = nullptr;
+int TotalEventos = 0; 
 
 Jugador jugador;
 
@@ -271,6 +285,43 @@ bool hayEnemigosVivos(Habitacion* h) {
         if (h->enemigos[i]->vida > 0) return true;
     }
     return false;
+}
+
+void CargarEventos(ifstream& archivo){
+    string linea;
+    while(getlinea(archivo,linea) && linea !="EVENTOS");
+    getline(archivo,linea);
+    TotalEventos = stoi(linea);
+    ListaEventos = new Evento*[TotalEventos];
+
+    for(int i = 0; i<TotalEventos; i++){
+        Evento* ev = new Evento();
+        getline(archivo,linea); //Estamos acá "&"
+        getline(archivo,linea); //Estamos en nombre.
+        ev->nombre = linea;
+
+        getline(archivo,linea);
+        stringstream event(linea);
+        string Palabra;
+        event >> Palabra >> ev->probabilidad; // "Probabilidad 0.3" toma esa linea, luego ignora palabra y toma el num.
+
+        getline(archivo, ev->descripcion);
+        getline(archivo, ev->opcion_A);
+        getline(archivo, ev->resultado_A);
+        getline(archivo, ev->opcion_B);
+        getline(archivo, ev->resultado_B);
+
+        ListaEventos[i] = ev;
+    }
+}
+
+
+void SucedeEvento(Habitacion* H){
+    if(H->tipo == "EVENTOS"){
+        
+    }
+
+
 }
 
 
