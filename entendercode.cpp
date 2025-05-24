@@ -321,5 +321,10 @@ int main() {
     }
     delete[] ListaHabitaciones;
 
+    for (int i = 0; i < TotalEnemigos; i++) {
+        delete ListaEnemigos[i];
+    }
+    delete[] ListaEnemigos;
+
     return 0;
 }
