@@ -281,7 +281,7 @@ int main() {
         return 1;
     }
 
-    srand(time(nullptr)); //Para que se vaya cambiando el núm q entrega la función rand cada vez q se reinicia.
+    srand(time(nullptr)); //Para que se vaya cambiando el núm q entrega la función rand cada vez q se reinicia el programa.
 
     CargarHabitaciones(archivo);
     CargarArcos(archivo);
