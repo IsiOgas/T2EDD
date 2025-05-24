@@ -172,7 +172,17 @@ void mostrarHabitacion(Habitacion* h) {
     if (h->hijo3) cout << "3. Ir a " << h->hijo3->nombre << endl;
 }
 
-
+/******
+*   void CargarEnemigos
+******
+*   Lee los enemigos asignados en un archivo y luego los guarda en un arreglo.
+******
+* Input:
+*   ifstream& archivo : archivo de entrada con los datos de los enemigos.
+******
+* Returns:
+*   void, no retorna nada -> modifica la variable global ListaEnemigos.
+*****/
 
 void CargarEnemigos(ifstream& archivo){
     string linea;
@@ -204,7 +214,19 @@ void CargarEnemigos(ifstream& archivo){
     }
 }
 
-
+/******
+*   void AparicionEnemigos
+******
+*   Utiliza la función rand(), inicialmente para randomizar si saldrán 1 o 2 enemigos en dicha habitación,
+*   luego recorre el arreglo global ListaEnemigos para randomizar cual enemigo saldrá, no se repitan en
+*   la misma habitación y en las siguientes si tiene vida igual a 0
+******
+* Input:
+*   Habitacion* H : Puntero a la habitacion que se desea aparecer un enemigo.
+******
+* Returns:
+*   void, no retorna nada -> modifica las variables enemigos[] y cantidadEnemigosAsignados de la habitación.
+*****/
 
 void AparicionEnemigos(Habitacion* H){
     if (H->tipo == "COMBATE" && !H->enemigosAsignados){
@@ -216,17 +238,33 @@ void AparicionEnemigos(Habitacion* H){
         }
 
         H->cantidadEnemigosAsignados = 0;
-        for (int i = 0; i < TotalEnemigos && H->cantidadEnemigosAsignados < Cantidad; i++) {
-            Enemigo* e = ListaEnemigos[i];
+        int Intentos = 0;
+        
+        while (H->cantidadEnemigosAsignados < Cantidad && Intentos < 20){ //Usamos ese 20 como tope para q no se vaya a bug, porque puede seguir buscando enemigos que ya no existen xd o nunca existieron.
+            int IndiceAleatorio = rand() % TotalEnemigos; //Recordatorio % te entrega el resto en una división
+            Enemigo* EnemigoElegido = ListaEnemigos[IndiceAleatorio];
 
-            if (e->vida > 0) {
-                H->enemigos[H->cantidadEnemigosAsignados] = e;
-                H->cantidadEnemigosAsignados++;
+            bool YaExiste = false;
+            for(int i = 0; i < H->cantidadEnemigosAsignados; i++){
+                if(H->enemigos[i] == EnemigoElegido){
+                    YaExiste = true; //Para que, si llegan a salir 2, no se repita el mismo enemigo (me paso en un ejemplo y quede O.O ?)
+                    i= H->cantidadEnemigosAsignados;
+                }
             }
+        
+            if(!YaExiste && EnemigoElegido->vida > 0){ //El enemigo puede volver a aparecer, si no murio, ya que en la habitación doble solo peleas con 1.
+            H->enemigos[H->cantidadEnemigosAsignados] = EnemigoElegido;
+            H->cantidadEnemigosAsignados++;
+            }
+
+            Intentos++;
         }
+
         H->enemigosAsignados = true;
+
     }
 }
+
 
 bool hayEnemigosVivos(Habitacion* h) {
     for (int i = 0; i < h->cantidadEnemigosAsignados; i++) {
@@ -235,12 +273,15 @@ bool hayEnemigosVivos(Habitacion* h) {
     return false;
 }
 
+
 int main() {
     ifstream archivo("ejemplo.map");
     if (!archivo.is_open()) {
         cerr << "Error: No se pudo abrir el archivo." << endl;
         return 1;
     }
+
+    srand(time(nullptr)); //Para que se vaya cambiando el núm q entrega la función rand cada vez q se reinicia.
 
     CargarHabitaciones(archivo);
     CargarArcos(archivo);
