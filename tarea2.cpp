@@ -596,5 +596,12 @@ int main(){
     }
     delete[] ListaEnemigos;
 
+    for (int i = 0; i < TotalMejoras; ++i){
+        delete ListaMejoras[i];
+    }
+    delete[] ListaMejoras;
+
+    
+
     return 0;
 }
