@@ -208,7 +208,8 @@ Habitacion* ElegirHabitacion(Habitacion* h) {
 *****/
 
 void mostrarHabitacion(Habitacion* h) {
-    cout << "\nEstás en: " << h->nombre << endl;
+    cout << "\n-------------------------------" << endl;
+    cout << "Estás en: " << h->nombre << endl;
     cout << h->descripcion << endl;
 }
 
@@ -397,7 +398,7 @@ void SucedeEvento(Habitacion* H){
             cout << cualevento->loquesucede_A << endl;
             cout << cualevento->resultado_A <<endl;
             AplicarResultado(cualevento->resultado_A, jugador);
-            cout << "-------------------------------" << endl;
+            cout << "\n-------------------------------" << endl;
             cout << "Estado actual del jugador:" << endl;
             cout << "Vida: " << jugador.getVida() << endl;
             cout << "Ataque: " << jugador.getAtaque() << endl;
@@ -408,7 +409,7 @@ void SucedeEvento(Habitacion* H){
             cout << cualevento->loquesucede_B << endl;
             cout << cualevento->resultado_B << endl; //AplicarResultado(cualevento->resultado_B, jugador)
             AplicarResultado(cualevento->resultado_B, jugador);
-            cout << "-------------------------------" << endl;
+            cout << "\n-------------------------------" << endl;
             cout << "Estado actual del jugador:" << endl;
             cout << "Vida: " << jugador.getVida() << endl;
             cout << "Ataque: " << jugador.getAtaque() << endl;
