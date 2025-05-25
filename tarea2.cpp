@@ -37,7 +37,14 @@ struct Habitacion{
     int cantidadEnemigosAsignados;
 };
 
-// Structs necesarios
+struct UpgradeCombate{
+    int vida=0;
+    float precision=0.0;
+    int ataque=0;
+    int recuperacion=0;
+
+};
+
 class Jugador{
     private:
         int vida;
@@ -63,6 +70,7 @@ class Jugador{
     // Setters
     void setVida(int v) { vida = v; }
     void setAtaque(int a) { ataque = a; }
+    void setPrecision(float p) { precision = p; }
     void setRecuperacion(int r) { recuperacion = r; }
 };
 
@@ -134,6 +142,8 @@ int totalHabitaciones;
 
 int totalArcos;
 
+int TotalMejoras;
+UpgradeCombate **ListaMejoras= nullptr;
 
 bool hayEnemigosVivos(Habitacion *h){
     for (int i = 0; i < h->cantidadEnemigosAsignados; i++){
@@ -166,6 +176,87 @@ void mostrarEstado(Jugador &jugador, Habitacion *h){
         }
     }
     cout << endl;
+}
+
+void mostrarMejorasCombate(Jugador &jugador, UpgradeCombate* ListaMejoras[], int TotalMejoras){
+
+    int MejCom1 = rand() % TotalMejoras; //Mejora 1: Es el resto de un numero muy grande(rand) dividido entre el total de mejoras
+    int MejCom2; //Se declara Mejora 2
+    do {    //Hacer(Buscar en este caso) Mejora 2 mientras Mejora 2 es igual a Mejora 1. Aqui buscando que M1 sea distinta de M2
+        MejCom2 = rand() % TotalMejoras;
+    } while (MejCom2 == MejCom1);
+
+    //ELIMINAR LUEGO
+    cout << "Mejora indices: " << MejCom1 << ", " << MejCom2 << endl;
+
+    UpgradeCombate* mejora1 = ListaMejoras[MejCom1]; //Punteros a las mejoras seleccionadas 
+    UpgradeCombate* mejora2 = ListaMejoras[MejCom2];
+
+    cout << "Debes decidir: " << endl;
+        
+    cout << " 1.";
+    if (mejora1->vida > 0){
+        cout << " Recuperar " << mejora1->vida << " de vida." << endl;
+    }else if (mejora1->ataque > 0){ //Si la mejora 1 seleccionada fue vida, se realiza el cout correspondiente 
+        cout << " Aumentar ataque en " << mejora1->ataque << "." << endl;
+    }else if (mejora1->precision > 0){
+        cout << " Aumentar precisión en " << mejora1->precision << "." << endl;
+    }else if (mejora1->recuperacion > 0){ 
+        cout << " Aumentar recuperación en " << mejora1->recuperacion << "." << endl;
+    }
+    
+    cout << " 2.";
+    if (mejora2->vida > 0){
+        cout << " Recuperar " << mejora2->vida << " de vida." << endl;
+    }else if (mejora2->ataque > 0){
+        cout << " Aumentar ataque en " << mejora2->ataque << "." << endl;
+    }else if (mejora2->precision > 0){
+        cout << " Aumentar precisión en " << mejora2->precision << "." << endl;
+    }else if (mejora2->recuperacion > 0){ 
+        cout << " Aumentar recuperación en " << mejora2->recuperacion << "." << endl;
+    }
+    
+
+    int eleccion;
+    cin >> eleccion;
+    while (eleccion != 1 && eleccion != 2) {
+        cout << "Opción inválida. Intente de nuevo: ";
+        cin >> eleccion;
+    }
+
+    //  ? se refiere a si la condicion es verdadera, : se refiere a si la condicion es falsa.
+    UpgradeCombate* elegida = (eleccion == 1) ? mejora1 : mejora2;
+    //Si la eleccion es igual a 1, entonces la elegida será igual a mejora1, si no será igual a mejora2.
+
+    /* EQUIVALENTE CON IF
+    UpgradeCombate* elegida;
+    if (eleccion == 1) {
+        elegida = mejora1;
+    } else {
+        elegida = mejora2;
+    }
+    */
+
+    if (elegida->vida > 0) {
+        jugador.setVida(jugador.getVida() + elegida->vida);
+        cout << "¡Recuperaste " << elegida->vida << " de vida!" << endl;
+    }
+    else if (elegida->ataque > 0) {
+        jugador.setAtaque(jugador.getAtaque() + elegida->ataque);
+        cout << "¡Aumentaste tu ataque en " << elegida->ataque << "!" << endl;
+    }
+    else if (elegida->precision > 0) {
+        jugador.setPrecision(jugador.getPrecision() + elegida->precision);
+        cout << "¡Aumentaste tu precisión en " << elegida->precision << "!" << endl;
+    }
+    else if (elegida->recuperacion > 0) {
+        jugador.setRecuperacion(jugador.getRecuperacion() + elegida->recuperacion);
+        cout << "¡Aumentaste tu recuperación en " << elegida->recuperacion << "!" << endl;
+    }
+
+    cout << endl;
+
+
 }
 
 void turnoCombate(Jugador &jugador, Habitacion *h){
@@ -219,25 +310,8 @@ void turnoCombate(Jugador &jugador, Habitacion *h){
 
     if (jugador.getVida() > 0){
         cout << "¡Ganaste el combate!" << endl;
-        cout << "Debes decidir: " << endl;
-        cout << "   1. Recuperar 5 de vida." << endl;
-        cout << "   2. Aumentar ataque en 1" << endl;
-
-        int eleccion;
-        cin >> eleccion;
-
-        while (eleccion != 1 && eleccion != 2) {
-            if (eleccion == 1){
-                jugador.setVida(jugador.getVida() + 5);
-                cout << "¡Recuperaste 5 de vida!" << endl;
-            }else if (eleccion == 2){
-                jugador.setAtaque(jugador.getAtaque() + 1);
-                cout << "¡Aumentaste tu ataque en 1!" << endl;
-            }else{
-                cout << "Opción inválida. Intente de nuevo." << endl;
-            }
-            cout<<endl;
-        }
+        mostrarMejorasCombate(jugador, ListaMejoras, TotalMejoras);
+        
     }else{
         cout << "Has sido derrotado..." << endl;
         juegoActivo=false; 
@@ -246,13 +320,13 @@ void turnoCombate(Jugador &jugador, Habitacion *h){
 }
 
 
-void cargarHabitaciones(ifstream &ejemplo){
+void cargarHabitaciones(ifstream &archivo){
     string linea;
 
     // Leer hasta encontrar el número de habitaciones
-    while (getline(ejemplo, linea) && linea != "HABITACIONES");
+    while (getline(archivo, linea) && linea != "HABITACIONES");
 
-    getline(ejemplo, linea);
+    getline(archivo, linea);
 
     totalHabitaciones = stoi(linea);
 
@@ -262,7 +336,7 @@ void cargarHabitaciones(ifstream &ejemplo){
     habitaciones = new Habitacion *[totalHabitaciones];
 
     for (int i = 0; i < totalHabitaciones; i++){
-        getline(ejemplo, linea);    // Leer línea completa
+        getline(archivo, linea);    // Leer línea completa
         stringstream cuarto(linea); // Nos permite recorrer por partes la linea que obtuvimos
         string dato;                // Declaramos variable donde se ira guardando cada valor que se extrae
         // Crear y guardar la habitación
@@ -284,19 +358,19 @@ void cargarHabitaciones(ifstream &ejemplo){
     }
 }
 
-void cargarArcos(ifstream &ejemplo){
+void cargarArcos(ifstream &archivo){
     string linea;
     // Buscar la línea "ARCOS"
-    while (getline(ejemplo, linea) && linea != "ARCOS");
+    while (getline(archivo, linea) && linea != "ARCOS");
     // Ahora leemos la cantidad de arcos que sigue a "ARCOS"
-    getline(ejemplo, linea);
+    getline(archivo, linea);
     totalArcos = stoi(linea);
 
     // ELIMINAR LUEGO, SOLO PARA COMPROBAR
     cout << "Cantidad de arcos a leer: " << totalArcos << endl;
 
     for (int i = 0; i < totalArcos; i++){
-        getline(ejemplo, linea);
+        getline(archivo, linea);
         stringstream arco(linea);
         string dato;
         // Leer origen hasta espacio
@@ -348,6 +422,47 @@ void CargarEnemigos(ifstream &archivo){
             }
         }
         ListaEnemigos[i] = e;
+    }
+}
+
+void cargaMejorasCombate(ifstream &archivo){
+    string linea;
+    while (getline(archivo, linea) && linea != "MEJORAS DE COMBATE");
+    
+    getline(archivo, linea);
+    TotalMejoras = stoi(linea);
+    ListaMejoras= new UpgradeCombate*[TotalMejoras];
+
+    //ELIMINAR LUEGO
+    cout<< "Cantidad mejoras a leer: "<<TotalMejoras<<endl;
+
+    for(int i=0; i<TotalMejoras; i++){
+        UpgradeCombate* mejora = new UpgradeCombate();
+        getline(archivo,linea); //Estamos en 1er mejora.
+
+        
+        
+        cout<< "Linea a leer: "<<linea<<endl;
+
+        stringstream Mejora(linea); 
+        string tipo;
+        float valor;
+        char signo;
+
+        Mejora >> signo >> valor >> tipo; // +4
+
+        if (tipo == "Vida" || tipo == "vida"){
+            mejora->vida = (int)valor;
+        }else if (tipo == "Precision" || tipo == "precision"){
+            mejora->precision = valor;
+        }else if (tipo == "Ataque" || tipo == "ataque"){
+            mejora->ataque = (int)valor;
+        }else if (tipo == "Recuperacion" || tipo == "recuperacion"){
+            mejora->recuperacion = (int)valor;
+        }
+        
+        ListaMejoras[i] = mejora;
+        
     }
 }
 
@@ -450,10 +565,12 @@ int main(){
         return 0;
     }
     srand(time(nullptr));
-
+    
+    //ELIMINAR LUEGO
     cargarHabitaciones(archivo);
     cargarArcos(archivo);
     CargarEnemigos(archivo);
+    cargaMejorasCombate(archivo);
 
     Habitacion *habitacionActual = habitaciones[0]; // puntero a la habitacion inicial
 
