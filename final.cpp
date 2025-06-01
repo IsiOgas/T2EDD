@@ -559,6 +559,30 @@ void AparicionEnemigos(Habitacion* h, Enemigo* ListaEnemigos[], int TotalEnemigo
         h->enemigosAsignados = true;
 }
 
+
+
+Habitacion *elegirHabitacion(Habitacion *h){
+    cout << "\nPuedes moverte de habitación!"<<endl;
+    if (h->hijo1) cout << "1. Ir a " << h->hijo1->nombre << endl;
+    if (h->hijo2) cout << "2. Ir a " << h->hijo2->nombre << endl;
+    if (h->hijo3) cout << "3. Ir a " << h->hijo3->nombre << endl;
+    
+    int opcion;
+    cin >> opcion;
+
+    if (opcion == 1 && h->hijo1){
+        return h->hijo1;
+    }else if (opcion == 2 && h->hijo2){
+        return h->hijo2;
+    }else if (opcion == 3 && h->hijo3){
+        return h->hijo3;
+    }else{
+        cout << "Opción inválida. Intenta de nuevo." << endl;
+        return h; // se queda en la misma habitación
+    }
+}
+
+
 void mostrarHabitacion(Habitacion *h, Jugador &jugador){
     if (h->id == 0){
         cout << "-- Habitación Inicial --" << endl;
@@ -578,39 +602,6 @@ void mostrarHabitacion(Habitacion *h, Jugador &jugador){
         cout << endl;
         turnoCombate(jugador, h);
         cout<<endl;
-    }else{
-        cout << "-- " << h->nombre << " --" << endl;
-        cout << h->descripcion << endl;
-    }
-
-    if (h->hijo1 || h->hijo2 || h->hijo3){
-        cout << "A donde quieres ir?" << endl;
-        if (h->hijo1){
-            cout << "1. " << h->hijo1->nombre << endl;
-        }
-        if (h->hijo2){
-            cout << "2. " << h->hijo2->nombre << endl;
-        }
-        if (h->hijo3){
-            cout << "3. " << h->hijo3->nombre << endl;
-        }
-        cout << "(Presiona la tecla correspondiente)" << endl;
-    }
-}
-
-Habitacion *elegirHabitacion(Habitacion *h){
-    int opcion;
-    cin >> opcion;
-
-    if (opcion == 1 && h->hijo1){
-        return h->hijo1;
-    }else if (opcion == 2 && h->hijo2){
-        return h->hijo2;
-    }else if (opcion == 3 && h->hijo3){
-        return h->hijo3;
-    }else{
-        cout << "Opción inválida. Intenta de nuevo." << endl;
-        return h; // se queda en la misma habitación
     }
 }
 
