@@ -442,20 +442,20 @@ int main() {
 
     while (JuegoActivo) {
         mostrarHabitacion(habitacionActual);
-        AparicionEnemigos(habitacionActual);
+        // AparicionEnemigos(habitacionActual);
         SucedeEvento(habitacionActual);
 
-        if (habitacionActual->cantidadEnemigosAsignados > 0) {
-        cout << "\nEnemigos en esta habitación:" << endl;
-            for (int i = 0; i < habitacionActual->cantidadEnemigosAsignados; i++) {
-                Enemigo* e = habitacionActual->enemigos[i];
-                cout << "- " << e->nombre 
-                 << " (Vida: " << e->vida 
-                 << ", Ataque: " << e->ataque
-                 << ", Precisión: " << e->precision 
-                 << ", Probabilidad: " << e->probabilidad << ")" << endl;
-             }
-        }
+        //if (habitacionActual->cantidadEnemigosAsignados > 0) {
+        //cout << "\nEnemigos en esta habitación:" << endl;
+        //    for (int i = 0; i < habitacionActual->cantidadEnemigosAsignados; i++) {
+        //        Enemigo* e = habitacionActual->enemigos[i];
+        //        cout << "- " << e->nombre 
+        //         << " (Vida: " << e->vida 
+        //         << ", Ataque: " << e->ataque
+        //         << ", Precisión: " << e->precision 
+        //         << ", Probabilidad: " << e->probabilidad << ")" << endl;
+        //     }
+        //}
 
         if (habitacionActual->tipo == "FIN") {
             cout << "\n╔══════════════════════════════╗\n";
