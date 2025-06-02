@@ -6,7 +6,6 @@
 #include <ctime>
 using namespace std;
 
-
 //Para TDA
 struct Nodo{
     string nombreTurno; // Puede ser "jugador" o el nombre de un enemigo
@@ -131,16 +130,20 @@ class TDACola{
     }
 };
 
+struct OpcionEvento{
+    char letra;
+    string opcion;
+    string loquesucede;
+    string resultado;
+};
+
 struct Evento {
     string nombre;
     float probabilidad;
     string descripcion;
-    string opcion_A;
-    string loquesucede_A;
-    string resultado_A;
-    string opcion_B;
-    string loquesucede_B;
-    string resultado_B;
+
+    OpcionEvento opciones[5]; // Max 5 opciones, según discord
+    int total_opciones;
 
     bool usado = false;
 };
@@ -251,7 +254,7 @@ void mostrarMejorasCombate(Jugador &jugador, UpgradeCombate* ListaMejoras[], int
             cin.ignore(1000, '\n');
             cout << "Entrada inválida. Intente de nuevo: ";
         } else if (eleccion != 1 && eleccion != 2) {
-            cout << "Opción inválida. Por favor, selecciona 1 o 2.";
+            cout << "Opción inválida. Por favor, selecciona 1 o 2: ";
         }
     }
 
@@ -544,14 +547,16 @@ void CargarEventos(ifstream& archivo){
 
         getline(archivo, ev->descripcion);
 
-        getline(archivo, ev->opcion_A);
-        getline(archivo, ev->loquesucede_A);
-        getline(archivo, ev->resultado_A);
+        getline(archivo, linea);
+        ev->total_opciones = stoi(linea);
 
-        getline(archivo, ev->opcion_B);
-        getline(archivo, ev->loquesucede_B);
-        getline(archivo, ev->resultado_B);
-
+        for(int j = 0; j < ev->total_opciones; j++){ //para q analice las opciones, ej: la opcion a tiene su opcion, lo que le sucede y su resultado
+            getline(archivo,linea); //Letra, ej: A
+            ev->opciones[j].letra = linea[0];
+            getline(archivo, ev->opciones[j].opcion);
+            getline(archivo, ev->opciones[j].loquesucede);
+            getline(archivo, ev->opciones[j].resultado);
+        }
         ListaEventos[i] = ev;
     }
 }
@@ -625,21 +630,79 @@ void AplicarResultado(string resultado, Jugador& jugador){
 
 Habitacion *elegirHabitacion(Habitacion *h){
     char opcion;
-    
-    cin >> opcion;
+    bool opcionValida = false;
 
-    if (opcion == '1' && h->hijo1){
-        return h->hijo1;
-    }else if (opcion == '2' && h->hijo2){
-        return h->hijo2;
-    }else if (opcion == '3' && h->hijo3){
-        return h->hijo3;
-    }else{
-        cout << "Opción inválida. Intenta de nuevo." << endl;
-        return h; // se queda en la misma habitación
+    while (!opcionValida){
+        cin >> opcion;
+
+        if (opcion == '1' && h->hijo1){
+            opcionValida = true;
+            return h->hijo1;
+        }
+        else if (opcion == '2' && h->hijo2){
+            opcionValida = true;
+            return h->hijo2;
+        }
+        else if (opcion == '3' && h->hijo3){
+            opcionValida = true;
+            return h->hijo3;
+        }
+        else {
+            cout << "Opción inválida. Intenta de nuevo: ";
+        }
+    }
+    return h; 
+}
+
+void MostrarEvento(Evento* CualEvento, Jugador& jugador){
+    cout << "--- Evento: " << CualEvento->nombre << " ---\n";
+    cout << CualEvento->descripcion << endl;
+
+    // Mostrar opciones
+    for(int i = 0; i < CualEvento->total_opciones; i++){
+        cout << CualEvento->opciones[i].letra << ": " << CualEvento->opciones[i].opcion << endl;
     }
 
-    
+    char Eleccion;
+    bool valida = false;
+
+    while (!valida) {
+        cout << "Elige una opción disponible: ";
+        cin >> Eleccion;
+
+        // Validar que la opción sea válida, ya que solo aceptaremos un maximo de 5 opciones
+        if (Eleccion == 'A' || Eleccion == 'a' ||
+            Eleccion == 'B' || Eleccion == 'b' ||
+            Eleccion == 'C' || Eleccion == 'c' ||
+            Eleccion == 'D' || Eleccion == 'd' ||
+            Eleccion == 'E' || Eleccion == 'e') {
+
+            // buscar la opción que corresponde
+            for(int i = 0; i < CualEvento->total_opciones; i++){
+                // Comparamos sin importar mayúscula o minúscula
+                if (Eleccion == CualEvento->opciones[i].letra || 
+                    Eleccion == (CualEvento->opciones[i].letra + 32)) {  // ese +32 es para que pase de mayuscula a minuscula.
+
+                    cout<< CualEvento->opciones[i].loquesucede <<endl;
+                    cout<< CualEvento->opciones[i].resultado <<endl;
+                    AplicarResultado(CualEvento->opciones[i].resultado, jugador);
+
+                    cout << "\n-------------------------------" << endl;
+                    cout << "Estado actual del jugador:" << endl;
+                    cout << "Vida: " << jugador.getVida() << endl;
+                    cout << "Ataque: " << jugador.getAtaque() << endl;
+                    cout << "Precisión: " << jugador.getPrecision() << endl;
+                    cout << "Recuperación: " << jugador.getRecuperacion() << endl;
+                    cout << "-------------------------------" << endl;
+
+                    valida = true;
+                }
+            }
+
+        } else {
+            cout << "Por favor, selecciona una opción válida." << endl;
+        }
+    }
 }
 
 
@@ -676,50 +739,15 @@ void mostrarHabitacion(Habitacion *h, Jugador &jugador){
             }
         }
 
-        if(cualevento == nullptr){ //se acabaron los eventos o no hay eventos disponibles
-            return;
+        if(cualevento == nullptr){
+            cout << "-- " << h->nombre << " --" << endl;
+            cout << h->descripcion << endl;
+            cout << "\n¡Qué mal! No desbloqueaste el evento... suena miau miua miua\n" << endl;
+        } else {
+            cualevento->usado = true;
+            MostrarEvento(cualevento, jugador);
         }
-
-        cualevento->usado = true; //le ponemos q el evento fue asignado y ya no se puede asignar en otra habitación.
-
-        cout << "\n--- Evento: " << cualevento->nombre << " ---\n";
-        cout << cualevento->descripcion << endl;
-        cout << cualevento->opcion_A << endl;
-        cout << cualevento->opcion_B << endl;
-        cout << "Elige A o B: ";
-
-        char Eleccion;
-        cin >> Eleccion;
         
-        while (Eleccion != 'A' && Eleccion != 'a' && Eleccion != 'B' && Eleccion != 'b') {
-            cout << "Por favor, selecciona A o B.";
-            cin >> Eleccion;
-            }
-            
-        if(Eleccion == 'A' || Eleccion == 'a'){
-            cout << cualevento->loquesucede_A << endl;
-            cout << cualevento->resultado_A <<endl;
-            AplicarResultado(cualevento->resultado_A, jugador);
-            cout << "\n-------------------------------" << endl;
-            cout << "Estado actual del jugador:" << endl;
-            cout << "Vida: " << jugador.getVida() << endl;
-            cout << "Ataque: " << jugador.getAtaque() << endl;
-            cout << "Precisión: " << jugador.getPrecision() << endl;
-            cout << "Recuperación: " << jugador.getRecuperacion() << endl;
-            cout << "-------------------------------" << endl;
-        } else if (Eleccion == 'B' || Eleccion == 'b'){
-            cout << cualevento->loquesucede_B << endl;
-            cout << cualevento->resultado_B << endl; //AplicarResultado(cualevento->resultado_B, jugador)
-            AplicarResultado(cualevento->resultado_B, jugador);
-            cout << "\n-------------------------------" << endl;
-            cout << "Estado actual del jugador:" << endl;
-            cout << "Vida: " << jugador.getVida() << endl;
-            cout << "Ataque: " << jugador.getAtaque() << endl;
-            cout << "Precisión: " << jugador.getPrecision() << endl;
-            cout << "Recuperación: " << jugador.getRecuperacion() << endl;
-            cout << "-------------------------------" << endl;
-        
-        }
     }else{
         cout << "-- " << h->nombre << " --" << endl;
         cout << h->descripcion << endl;
@@ -739,13 +767,6 @@ void mostrarHabitacion(Habitacion *h, Jugador &jugador){
         cout << "(Presiona la tecla correspondiente)" << endl;
     }
 }
-
-
-
-
-
-
-
 
 
 

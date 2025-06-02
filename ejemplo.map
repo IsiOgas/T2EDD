@@ -42,30 +42,39 @@ EVENTOS
 Tesoro
 Probabilidad 0.3
 Encuentras un tesoro!...
-A: Abrirlo
+2
+A
+Abrirlo
 Era una mímica! El terror afecta tu psique.
 -0.2 PRECISION
-B: Dejarlo
+B
+Dejarlo
 Se ve sus, lo dejas pasar.
 Ninguna consecuencia.
 &
 Sentimiento
 Probabilidad 0.3
 Te empiezas a sentir extraño...
-A: Te acuestas en el suelo
+2
+A
+Te acuestas en el suelo
 Te despiertas muy relajado y feliz!
 +10 Vida
-B: Tratas de continuar
+B
+Tratas de continuar
 Te mareas, te tropiezas, y te esguinzas la articulación metacarpofalángica!
 -5 Vida
 &
 Silueta
 Probabilidad 0.4
 Ves una silueta misteriosa a lo lejos.
-A: La tratas de dibujar.
+2
+A
+La tratas de dibujar.
 Logras un dibujo excelente, impresionando a todos tus amigos!
 +7 Vida
-B: Lo tratas de identificar.
+B
+Lo tratas de identificar.
 Tras horas de forzar la vista logras entender que era una mancha en el cielo simplemente. Tu vista se agotó.
 -0.3 Precision
 MEJORAS DE COMBATE
