@@ -244,8 +244,15 @@ void mostrarMejorasCombate(Jugador &jugador, UpgradeCombate* ListaMejoras[], int
     int eleccion;
     cin >> eleccion;
     while (eleccion != 1 && eleccion != 2) {
-        cout << "Opción inválida. Intente de nuevo: ";
         cin >> eleccion;
+
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Entrada inválida. Intente de nuevo: ";
+        } else if (eleccion != 1 && eleccion != 2) {
+            cout << "Opción inválida. Por favor, selecciona 1 o 2.";
+        }
     }
 
     //  ? se refiere a si la condicion es verdadera, : se refiere a si la condicion es falsa.
@@ -277,6 +284,13 @@ void mostrarMejorasCombate(Jugador &jugador, UpgradeCombate* ListaMejoras[], int
         jugador.setRecuperacion(jugador.getRecuperacion() + elegida->recuperacion);
         cout << "¡Aumentaste tu recuperación en " << elegida->recuperacion << "!" << endl;
     }
+    //BORRAR
+    cout << "Estado actual del jugador:" << endl;
+            cout << "Vida: " << jugador.getVida() << endl;
+            cout << "Ataque: " << jugador.getAtaque() << endl;
+            cout << "Precisión: " << jugador.getPrecision() << endl;
+            cout << "Recuperación: " << jugador.getRecuperacion() << endl;
+            cout << "-------------------------------" << endl;
 
     cout << endl;
 
@@ -478,7 +492,7 @@ void cargaMejorasCombate(ifstream &archivo){
     ListaMejoras= new UpgradeCombate*[TotalMejoras];
 
     //ELIMINAR LUEGO
-    cout<< "Cantidad mejoras a leer: "<<TotalMejoras<<endl;
+   // cout<< "Cantidad mejoras a leer: "<<TotalMejoras<<endl;
 
     for(int i=0; i<TotalMejoras; i++){
         UpgradeCombate* mejora = new UpgradeCombate();
@@ -486,7 +500,7 @@ void cargaMejorasCombate(ifstream &archivo){
 
         
         
-        cout<< "Linea a leer: "<<linea<<endl;
+       // cout<< "Linea a leer: "<<linea<<endl;
 
         stringstream Mejora(linea); 
         string tipo;
@@ -510,6 +524,37 @@ void cargaMejorasCombate(ifstream &archivo){
     }
 }
 
+void CargarEventos(ifstream& archivo){
+    string linea;
+    while(getline(archivo,linea) && linea !="EVENTOS");
+    getline(archivo,linea);
+    TotalEventos = stoi(linea);
+    ListaEventos = new Evento*[TotalEventos];
+
+    for(int i = 0; i<TotalEventos; i++){
+        Evento* ev = new Evento();
+        getline(archivo,linea); //Estamos acá "&"
+        getline(archivo,linea); //Estamos en nombre.
+        ev->nombre = linea;
+
+        getline(archivo,linea);
+        stringstream event(linea);
+        string Palabra;
+        event >> Palabra >> ev->probabilidad; // "Probabilidad 0.3" toma esa linea, luego ignora palabra y toma el num.
+
+        getline(archivo, ev->descripcion);
+
+        getline(archivo, ev->opcion_A);
+        getline(archivo, ev->loquesucede_A);
+        getline(archivo, ev->resultado_A);
+
+        getline(archivo, ev->opcion_B);
+        getline(archivo, ev->loquesucede_B);
+        getline(archivo, ev->resultado_B);
+
+        ListaEventos[i] = ev;
+    }
+}
 
 /******
 *   void AparicionEnemigos
@@ -559,27 +604,42 @@ void AparicionEnemigos(Habitacion* h, Enemigo* ListaEnemigos[], int TotalEnemigo
         h->enemigosAsignados = true;
 }
 
+void AplicarResultado(string resultado, Jugador& jugador){
+    stringstream result(resultado);
+    string caracteristicas;
+    float valor;
+
+    while(result >> valor >> caracteristicas) {
+        if (caracteristicas == "VIDA" || caracteristicas == "vida" || caracteristicas == "Vida") {
+            jugador.setVida(jugador.getVida() + valor);
+        } else if (caracteristicas == "ATAQUE" || caracteristicas == "ataque" || caracteristicas == "Ataque") {
+            jugador.setAtaque(jugador.getAtaque() + valor);
+        } else if (caracteristicas == "PRECISION" || caracteristicas == "precision" || caracteristicas == "Precision") {
+            jugador.setPrecision(jugador.getPrecision() + valor);
+        } else if (caracteristicas == "RECUPERACION" || caracteristicas == "recuperacion" || caracteristicas == "Recuperacion") {
+            jugador.setRecuperacion(jugador.getRecuperacion() + valor);
+        }
+    }
+}
 
 
 Habitacion *elegirHabitacion(Habitacion *h){
-    cout << "\nPuedes moverte de habitación!"<<endl;
-    if (h->hijo1) cout << "1. Ir a " << h->hijo1->nombre << endl;
-    if (h->hijo2) cout << "2. Ir a " << h->hijo2->nombre << endl;
-    if (h->hijo3) cout << "3. Ir a " << h->hijo3->nombre << endl;
+    char opcion;
     
-    int opcion;
     cin >> opcion;
 
-    if (opcion == 1 && h->hijo1){
+    if (opcion == '1' && h->hijo1){
         return h->hijo1;
-    }else if (opcion == 2 && h->hijo2){
+    }else if (opcion == '2' && h->hijo2){
         return h->hijo2;
-    }else if (opcion == 3 && h->hijo3){
+    }else if (opcion == '3' && h->hijo3){
         return h->hijo3;
     }else{
         cout << "Opción inválida. Intenta de nuevo." << endl;
         return h; // se queda en la misma habitación
     }
+
+    
 }
 
 
@@ -602,63 +662,7 @@ void mostrarHabitacion(Habitacion *h, Jugador &jugador){
         cout << endl;
         turnoCombate(jugador, h);
         cout<<endl;
-    }
-}
-
-
-void AplicarResultado(string resultado, Jugador& jugador){
-    stringstream result(resultado);
-    string caracteristicas;
-    float valor;
-
-    while(result >> valor >> caracteristicas) {
-        if (caracteristicas == "VIDA" || caracteristicas == "vida" || caracteristicas == "Vida") {
-            jugador.setVida(jugador.getVida() + valor);
-        } else if (caracteristicas == "ATAQUE" || caracteristicas == "ataque" || caracteristicas == "Ataque") {
-            jugador.setAtaque(jugador.getAtaque() + valor);
-        } else if (caracteristicas == "PRECISION" || caracteristicas == "precision" || caracteristicas == "Precision") {
-            jugador.setPrecision(jugador.getPrecision() + valor);
-        } else if (caracteristicas == "RECUPERACION" || caracteristicas == "recuperacion" || caracteristicas == "Recuperacion") {
-            jugador.setRecuperacion(jugador.getRecuperacion() + valor);
-        }
-    }
-}
-
-void CargarEventos(ifstream& archivo){
-    string linea;
-    while(getline(archivo,linea) && linea !="EVENTOS");
-    getline(archivo,linea);
-    TotalEventos = stoi(linea);
-    ListaEventos = new Evento*[TotalEventos];
-
-    for(int i = 0; i<TotalEventos; i++){
-        Evento* ev = new Evento();
-        getline(archivo,linea); //Estamos acá "&"
-        getline(archivo,linea); //Estamos en nombre.
-        ev->nombre = linea;
-
-        getline(archivo,linea);
-        stringstream event(linea);
-        string Palabra;
-        event >> Palabra >> ev->probabilidad; // "Probabilidad 0.3" toma esa linea, luego ignora palabra y toma el num.
-
-        getline(archivo, ev->descripcion);
-
-        getline(archivo, ev->opcion_A);
-        getline(archivo, ev->loquesucede_A);
-        getline(archivo, ev->resultado_A);
-
-        getline(archivo, ev->opcion_B);
-        getline(archivo, ev->loquesucede_B);
-        getline(archivo, ev->resultado_B);
-
-        ListaEventos[i] = ev;
-    }
-}
-
-
-void SucedeEvento(Habitacion* H){
-    if(H->tipo == "EVENTO"){
+    }else if(h->tipo == "EVENTO"){
         float random_num = (rand() % 1000)/1000.0; //no supe como hacer del 0 al 1 asi q ese es del 0 a al 0.999
         float suma = 0;
         Evento* cualevento = nullptr;
@@ -686,6 +690,12 @@ void SucedeEvento(Habitacion* H){
 
         char Eleccion;
         cin >> Eleccion;
+        
+        while (Eleccion != 'A' && Eleccion != 'a' && Eleccion != 'B' && Eleccion != 'b') {
+            cout << "Por favor, selecciona A o B.";
+            cin >> Eleccion;
+            }
+            
         if(Eleccion == 'A' || Eleccion == 'a'){
             cout << cualevento->loquesucede_A << endl;
             cout << cualevento->resultado_A <<endl;
@@ -708,11 +718,34 @@ void SucedeEvento(Habitacion* H){
             cout << "Precisión: " << jugador.getPrecision() << endl;
             cout << "Recuperación: " << jugador.getRecuperacion() << endl;
             cout << "-------------------------------" << endl;
-        } else{
-            cout << "Por favor, selecciona A o B.";
+        
         }
+    }else{
+        cout << "-- " << h->nombre << " --" << endl;
+        cout << h->descripcion << endl;
+    }
+
+    if (h->hijo1 || h->hijo2 || h->hijo3){
+        cout << "A donde quieres ir?" << endl;
+        if (h->hijo1){
+            cout << "1. " << h->hijo1->nombre << endl;
+        }
+        if (h->hijo2){
+            cout << "2. " << h->hijo2->nombre << endl;
+        }
+        if (h->hijo3){
+            cout << "3. " << h->hijo3->nombre << endl;
+        }
+        cout << "(Presiona la tecla correspondiente)" << endl;
     }
 }
+
+
+
+
+
+
+
 
 
 
@@ -729,13 +762,14 @@ int main() {
     CargarArcos(archivo);
     CargarEnemigos(archivo);
     CargarEventos(archivo);
+    cargaMejorasCombate(archivo);
 
     Habitacion* habitacionActual = ListaHabitaciones[0];
     bool JuegoActivo = true;
 
     while (JuegoActivo) {
         mostrarHabitacion(habitacionActual, jugador);
-        SucedeEvento(habitacionActual);
+        
 
         if (habitacionActual->tipo == "FIN") {
             JuegoActivo = false;
