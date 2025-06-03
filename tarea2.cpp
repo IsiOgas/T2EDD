@@ -6,7 +6,6 @@
 #include <ctime>
 using namespace std;
 
-
 //Para TDA
 struct Nodo{
     string nombreTurno; // Puede ser "jugador" o el nombre de un enemigo
@@ -74,6 +73,7 @@ class Jugador{
     void setRecuperacion(int r) { recuperacion = r; }
 };
 
+
 // funciones para TDA Cola
 class TDACola{
     private:
@@ -130,20 +130,44 @@ class TDACola{
     }
 };
 
+struct OpcionEvento{
+    char letra;
+    string opcion;
+    string loquesucede;
+    string resultado;
+};
+
+struct Evento {
+    string nombre;
+    float probabilidad;
+    string descripcion;
+
+    OpcionEvento opciones[5]; // Max 5 opciones, según discord
+    int total_opciones;
+
+    bool usado = false;
+};
+
 
 Jugador jugador;
-bool juegoActivo = true;
+bool JuegoActivo = true;
+bool ganaste = true;
 
-Enemigo **ListaEnemigos = nullptr;
-int TotalEnemigos;
+Enemigo** ListaEnemigos = nullptr;
+int TotalEnemigos = 0;
 
-Habitacion **habitaciones = nullptr;
-int totalHabitaciones;
+Habitacion** ListaHabitaciones = nullptr;
+int TotalHabitaciones = 0;
 
 int totalArcos;
 
 int TotalMejoras;
 UpgradeCombate **ListaMejoras= nullptr;
+
+Evento** ListaEventos = nullptr;
+int TotalEventos = 0; 
+
+
 
 bool hayEnemigosVivos(Habitacion *h){
     for (int i = 0; i < h->cantidadEnemigosAsignados; i++){
@@ -153,6 +177,8 @@ bool hayEnemigosVivos(Habitacion *h){
     }
     return false;
 }
+
+
 
 void mostrarEstado(Jugador &jugador, Habitacion *h){
     // Mostrar nombres
@@ -177,6 +203,8 @@ void mostrarEstado(Jugador &jugador, Habitacion *h){
     }
     cout << endl;
 }
+
+
 
 void mostrarMejorasCombate(Jugador &jugador, UpgradeCombate* ListaMejoras[], int TotalMejoras){
 
@@ -217,11 +245,12 @@ void mostrarMejorasCombate(Jugador &jugador, UpgradeCombate* ListaMejoras[], int
     }
     
 
-    int eleccion;
+    char eleccion;
     cin >> eleccion;
-    while (eleccion != 1 && eleccion != 2) {
-        cout << "Opción inválida. Intente de nuevo: ";
+    while (eleccion != '1' && eleccion != '2') {
+        cout << "Opción inválida. Por favor, selecciona 1 o 2: ";
         cin >> eleccion;
+
     }
 
     //  ? se refiere a si la condicion es verdadera, : se refiere a si la condicion es falsa.
@@ -253,11 +282,19 @@ void mostrarMejorasCombate(Jugador &jugador, UpgradeCombate* ListaMejoras[], int
         jugador.setRecuperacion(jugador.getRecuperacion() + elegida->recuperacion);
         cout << "¡Aumentaste tu recuperación en " << elegida->recuperacion << "!" << endl;
     }
+    //BORRAR
+    cout << "Estado actual del jugador:" << endl;
+            cout << "Vida: " << jugador.getVida() << endl;
+            cout << "Ataque: " << jugador.getAtaque() << endl;
+            cout << "Precisión: " << jugador.getPrecision() << endl;
+            cout << "Recuperación: " << jugador.getRecuperacion() << endl;
+            cout << "-------------------------------" << endl;
 
     cout << endl;
 
 
 }
+
 
 void turnoCombate(Jugador &jugador, Habitacion *h){
     TDACola colaTurnos;
@@ -314,116 +351,137 @@ void turnoCombate(Jugador &jugador, Habitacion *h){
         
     }else{
         cout << "Has sido derrotado..." << endl;
-        juegoActivo=false; 
+        cout << "\n╔══════════════════════════════╗\n";
+        cout <<   "║     G A M E   O V E R . . .  ║\n";
+        cout <<   "╚══════════════════════════════╝\n\n";
             
     }
 }
 
 
-void cargarHabitaciones(ifstream &archivo){
+/******
+*   void CargarHabitaciones
+******
+*   Lee las habitaciones desde un archivo y las almacena en un arreglo global.
+******
+* Input:
+*   ifstream& archivo : archivo de entrada con los datos de las habitaciones
+******
+* Returns:
+*   void, no retorna nada -> modifica la variable global ListaHabitaciones.
+*****/
+
+void CargarHabitaciones(ifstream& archivo) {
     string linea;
-
-    // Leer hasta encontrar el número de habitaciones
     while (getline(archivo, linea) && linea != "HABITACIONES");
-
     getline(archivo, linea);
+    TotalHabitaciones = stoi(linea  );
+    string dato;
+    ListaHabitaciones = new Habitacion*[TotalHabitaciones];
 
-    totalHabitaciones = stoi(linea);
+    for (int i = 0; i < TotalHabitaciones; i++) {
+        getline(archivo, linea);
+        stringstream ss(linea);
+        ListaHabitaciones[i] = new Habitacion();
 
-    // ELIMINAR LUEGO, SOLO PARA COMPROBAR
-    cout << "Cantidad de habitaciones a leer: " << totalHabitaciones << endl;
+        getline(ss, dato, ';');
+        ListaHabitaciones[i]->id = stoi(dato);
 
-    habitaciones = new Habitacion *[totalHabitaciones];
+        getline(ss, dato, ';');
+        ListaHabitaciones[i]->nombre = dato;
 
-    for (int i = 0; i < totalHabitaciones; i++){
-        getline(archivo, linea);    // Leer línea completa
-        stringstream cuarto(linea); // Nos permite recorrer por partes la linea que obtuvimos
-        string dato;                // Declaramos variable donde se ira guardando cada valor que se extrae
-        // Crear y guardar la habitación
-        habitaciones[i] = new Habitacion();
-        // Leer los campos separados por ';'
-        getline(cuarto, dato, ';');
-        habitaciones[i]->id = stoi(dato); // Convierte el id de string a int
+        getline(ss, dato, ';');
+        ListaHabitaciones[i]->tipo = dato;
 
-        getline(cuarto, dato, ';');
-        habitaciones[i]->nombre = dato;
+        getline(ss, dato);
+        ListaHabitaciones[i]->descripcion = dato;
 
-        getline(cuarto, dato, ';');
-        habitaciones[i]->tipo = dato;
-
-        getline(cuarto, dato);
-        habitaciones[i]->descripcion = dato;
-
-        habitaciones[i]->hijo1 = habitaciones[i]->hijo2 = habitaciones[i]->hijo3 = nullptr;
+        ListaHabitaciones[i]->hijo1 = nullptr;
+        ListaHabitaciones[i]->hijo2 = nullptr;
+        ListaHabitaciones[i]->hijo3 = nullptr;
     }
 }
 
-void cargarArcos(ifstream &archivo){
+/******
+*   void CargarArcos
+******
+*   Lee los arcos entre habitaciones desde un archivo y establece los punteros hijos.
+******
+* Input:
+*   ifstream& archivo : archivo de entrada con los datos de los arcos
+******
+* Returns:
+*   void, no retorna nada -> modifica los punteros hijo1, hijo2 y hijo3 de las habitaciones
+*****/
+
+void CargarArcos(ifstream& archivo) {
     string linea;
-    // Buscar la línea "ARCOS"
     while (getline(archivo, linea) && linea != "ARCOS");
-    // Ahora leemos la cantidad de arcos que sigue a "ARCOS"
     getline(archivo, linea);
-    totalArcos = stoi(linea);
+    int TotalArcos = stoi(linea);
 
-    // ELIMINAR LUEGO, SOLO PARA COMPROBAR
-    cout << "Cantidad de arcos a leer: " << totalArcos << endl;
-
-    for (int i = 0; i < totalArcos; i++){
+    for (int i = 0; i < TotalArcos; i++) {
         getline(archivo, linea);
-        stringstream arco(linea);
-        string dato;
-        // Leer origen hasta espacio
-        getline(arco, dato, ' ');
-        int origen = stoi(dato);
-        // Leer "->"
-        getline(arco, dato, ' '); // temp = "->"
-        // Leer destino
-        getline(arco, dato);
-        int destino = stoi(dato);
-        // Ahora conectamos origen y destino
-        Habitacion *origenHabitacion = habitaciones[origen]; // Puntero al id de habitacion
-        Habitacion *destinoHabitacion = habitaciones[destino];
-        // Asignar el destino al primer hijo vacío
-        if (origenHabitacion->hijo1 == nullptr){
-            origenHabitacion->hijo1 = destinoHabitacion;
-        }else if (origenHabitacion->hijo2 == nullptr){
-            origenHabitacion->hijo2 = destinoHabitacion;
-        }else if (origenHabitacion->hijo3 == nullptr){
-            origenHabitacion->hijo3 = destinoHabitacion;
+        stringstream ss(linea);
+        string origenStr, flecha, destinoStr;
+
+        ss >> origenStr >> flecha >> destinoStr;
+        int origen = stoi(origenStr);
+        int destino = stoi(destinoStr);
+
+        if (ListaHabitaciones[origen]->hijo1 == nullptr) {
+            ListaHabitaciones[origen]->hijo1 = ListaHabitaciones[destino];
+        } else if (ListaHabitaciones[origen]->hijo2 == nullptr) {
+            ListaHabitaciones[origen]->hijo2 = ListaHabitaciones[destino];
+        } else if (ListaHabitaciones[origen]->hijo3 == nullptr) {
+            ListaHabitaciones[origen]->hijo3 = ListaHabitaciones[destino];
         }
     }
 }
 
-void CargarEnemigos(ifstream &archivo){
-    string linea;
-    while (getline(archivo, linea) && linea != "ENEMIGOS");
-    getline(archivo, linea);
-    TotalEnemigos = stoi(linea);
-    ListaEnemigos = new Enemigo *[TotalEnemigos];
 
-    for (int i = 0; i < TotalEnemigos; i++){
+/******
+*   void CargarEnemigos
+******
+*   Lee los enemigos asignados en un archivo y luego los guarda en un arreglo.
+******
+* Input:
+*   ifstream& archivo : archivo de entrada con los datos de los enemigos.
+******
+* Returns:
+*   void, no retorna nada -> modifica la variable global ListaEnemigos.
+*****/
+
+void CargarEnemigos(ifstream& archivo){
+    string linea;
+    while(getline(archivo,linea) && linea != "ENEMIGOS");
+    getline(archivo,linea);
+    TotalEnemigos = stoi(linea);
+    ListaEnemigos = new Enemigo*[TotalEnemigos];
+        
+    for(int i = 0; i < TotalEnemigos;i++){
         getline(archivo, linea);
         stringstream enemy(linea);
-        Enemigo *e = new Enemigo();
-        string cursor;
+        Enemigo* e = new Enemigo();
+        string cursor; 
 
         getline(enemy, e->nombre, '|');
 
-        while (enemy >> cursor){
-            if (cursor == "Vida"){
+        while (enemy >> cursor) {
+            if (cursor == "Vida") {
                 enemy >> e->vida;
-            }else if (cursor == "Ataque"){
+            } else if (cursor == "Ataque") {
                 enemy >> e->ataque;
-            }else if (cursor == "Precision"){
+            } else if (cursor == "Precision") {
                 enemy >> e->precision;
-            }else if (cursor == "Probabilidad"){
+            } else if (cursor == "Probabilidad") {
                 enemy >> e->probabilidad;
             }
         }
         ListaEnemigos[i] = e;
     }
 }
+
 
 void cargaMejorasCombate(ifstream &archivo){
     string linea;
@@ -434,7 +492,7 @@ void cargaMejorasCombate(ifstream &archivo){
     ListaMejoras= new UpgradeCombate*[TotalMejoras];
 
     //ELIMINAR LUEGO
-    cout<< "Cantidad mejoras a leer: "<<TotalMejoras<<endl;
+   // cout<< "Cantidad mejoras a leer: "<<TotalMejoras<<endl;
 
     for(int i=0; i<TotalMejoras; i++){
         UpgradeCombate* mejora = new UpgradeCombate();
@@ -442,7 +500,7 @@ void cargaMejorasCombate(ifstream &archivo){
 
         
         
-        cout<< "Linea a leer: "<<linea<<endl;
+       // cout<< "Linea a leer: "<<linea<<endl;
 
         stringstream Mejora(linea); 
         string tipo;
@@ -466,6 +524,53 @@ void cargaMejorasCombate(ifstream &archivo){
     }
 }
 
+void CargarEventos(ifstream& archivo){
+    string linea;
+    while(getline(archivo,linea) && linea !="EVENTOS");
+    getline(archivo,linea);
+    TotalEventos = stoi(linea);
+    ListaEventos = new Evento*[TotalEventos];
+
+    for(int i = 0; i<TotalEventos; i++){
+        Evento* ev = new Evento();
+        getline(archivo,linea); //Estamos acá "&"
+        getline(archivo,linea); //Estamos en nombre.
+        ev->nombre = linea;
+
+        getline(archivo,linea);
+        stringstream event(linea);
+        string Palabra;
+        event >> Palabra >> ev->probabilidad; // "Probabilidad 0.3" toma esa linea, luego ignora palabra y toma el num.
+
+        getline(archivo, ev->descripcion);
+
+        getline(archivo, linea);
+        ev->total_opciones = stoi(linea);
+
+        for(int j = 0; j < ev->total_opciones; j++){ //para q analice las opciones, ej: la opcion a tiene su opcion, lo que le sucede y su resultado
+            getline(archivo,linea); //Letra, ej: A
+            ev->opciones[j].letra = linea[0];
+            getline(archivo, ev->opciones[j].opcion);
+            getline(archivo, ev->opciones[j].loquesucede);
+            getline(archivo, ev->opciones[j].resultado);
+        }
+        ListaEventos[i] = ev;
+    }
+}
+
+/******
+*   void AparicionEnemigos
+******
+*   Utiliza la función rand(), inicialmente para randomizar si saldrán 1 o 2 enemigos en dicha habitación,
+*   luego recorre el arreglo global ListaEnemigos para randomizar cual enemigo saldrá, no se repitan en
+*   la misma habitación y en las siguientes si tiene vida igual a 0
+******
+* Input:
+*   Habitacion* H : Puntero a la habitacion que se desea aparecer un enemigo.
+******
+* Returns:
+*   void, no retorna nada -> modifica las variables enemigos[] y cantidadEnemigosAsignados de la habitación.
+*****/
 
 void AparicionEnemigos(Habitacion* h, Enemigo* ListaEnemigos[], int TotalEnemigos){
     int Cantidad;
@@ -501,12 +606,113 @@ void AparicionEnemigos(Habitacion* h, Enemigo* ListaEnemigos[], int TotalEnemigo
         h->enemigosAsignados = true;
 }
 
+void AplicarResultado(string resultado, Jugador& jugador){
+    stringstream result(resultado);
+    string caracteristicas;
+    float valor;
+
+    while(result >> valor >> caracteristicas) {
+        if (caracteristicas == "VIDA" || caracteristicas == "vida" || caracteristicas == "Vida") {
+            jugador.setVida(jugador.getVida() + valor);
+        } else if (caracteristicas == "ATAQUE" || caracteristicas == "ataque" || caracteristicas == "Ataque") {
+            jugador.setAtaque(jugador.getAtaque() + valor);
+        } else if (caracteristicas == "PRECISION" || caracteristicas == "precision" || caracteristicas == "Precision") {
+            jugador.setPrecision(jugador.getPrecision() + valor);
+        } else if (caracteristicas == "RECUPERACION" || caracteristicas == "recuperacion" || caracteristicas == "Recuperacion") {
+            jugador.setRecuperacion(jugador.getRecuperacion() + valor);
+        }
+    }
+}
+
+
+Habitacion *elegirHabitacion(Habitacion *h){
+    char opcion;
+    bool opcionValida = false;
+
+    while (!opcionValida){
+        cin >> opcion;
+
+        if (opcion == '1' && h->hijo1){
+            opcionValida = true;
+            return h->hijo1;
+        }
+        else if (opcion == '2' && h->hijo2){
+            opcionValida = true;
+            return h->hijo2;
+        }
+        else if (opcion == '3' && h->hijo3){
+            opcionValida = true;
+            return h->hijo3;
+        }
+        else {
+            cout << "Opción inválida. Intenta de nuevo: ";
+        }
+    }
+    return h; 
+}
+
+void MostrarEvento(Evento* CualEvento, Jugador& jugador){
+    cout << "--- Evento: " << CualEvento->nombre << " ---\n";
+    cout << CualEvento->descripcion << endl;
+
+    // Mostrar opciones
+    for(int i = 0; i < CualEvento->total_opciones; i++){
+        cout << CualEvento->opciones[i].letra << ": " << CualEvento->opciones[i].opcion << endl;
+    }
+
+    char Eleccion;
+    bool valida = false;
+
+    while (!valida) {
+        cout << "Elige una opción disponible: ";
+        cin >> Eleccion;
+
+        // Validar que la opción sea válida, ya que solo aceptaremos un maximo de 5 opciones
+        if (Eleccion == 'A' || Eleccion == 'a' ||
+            Eleccion == 'B' || Eleccion == 'b' ||
+            Eleccion == 'C' || Eleccion == 'c' ||
+            Eleccion == 'D' || Eleccion == 'd' ||
+            Eleccion == 'E' || Eleccion == 'e') {
+
+            // buscar la opción que corresponde
+            for(int i = 0; i < CualEvento->total_opciones; i++){
+                // Comparamos sin importar mayúscula o minúscula
+                if (Eleccion == CualEvento->opciones[i].letra || 
+                    Eleccion == (CualEvento->opciones[i].letra + 32)) {  // ese +32 es para que pase de mayuscula a minuscula.
+
+                    cout<< CualEvento->opciones[i].loquesucede <<endl;
+                    cout<< CualEvento->opciones[i].resultado <<endl;
+                    AplicarResultado(CualEvento->opciones[i].resultado, jugador);
+
+                    cout << "\n-------------------------------" << endl;
+                    cout << "Estado actual del jugador:" << endl;
+                    cout << "Vida: " << jugador.getVida() << endl;
+                    cout << "Ataque: " << jugador.getAtaque() << endl;
+                    cout << "Precisión: " << jugador.getPrecision() << endl;
+                    cout << "Recuperación: " << jugador.getRecuperacion() << endl;
+                    cout << "-------------------------------" << endl;
+
+                    valida = true;
+                }
+            }
+
+        } else {
+            cout << "Por favor, selecciona una opción válida." << endl;
+        }
+    }
+}
+
+
 void mostrarHabitacion(Habitacion *h, Jugador &jugador){
+
     if (h->id == 0){
         cout << "-- Habitación Inicial --" << endl;
         cout << h->descripcion << endl;
-    }else if (h->tipo == "COMBATE" && !h->enemigosAsignados){
 
+    }else if (h->tipo == "COMBATE" && !h->enemigosAsignados){
+        cout << "-- " << h->nombre << " --" << endl;
+        cout << h->descripcion << endl;
+        cout << "\n" << endl;
         AparicionEnemigos(h, ListaEnemigos, TotalEnemigos);
 
         if (h->cantidadEnemigosAsignados == 1){
@@ -515,93 +721,113 @@ void mostrarHabitacion(Habitacion *h, Jugador &jugador){
             cout << "¡Te enfrentas a dos monstruos: " << h->enemigos[0]->nombre << " y " << h->enemigos[1]->nombre << "!" << endl;
         }
 
+        cout << "-------------------------" << endl;
         mostrarEstado(jugador, h);
         cout << "-------------------------" << endl;
-        cout << endl;
         turnoCombate(jugador, h);
-        cout<<endl;
+        if (jugador.getVida() <= 0) {
+            JuegoActivo = false;  
+        }
+    }else if(h->tipo == "EVENTO"){
+        cout << "-- " << h->nombre << " --" << endl;
+        cout << h->descripcion << endl;
+        cout << "\n" << endl;
+        float random_num = (rand() % 1000)/1000.0; //no supe como hacer del 0 al 1 asi q ese es del 0 a al 0.999
+        float suma = 0;
+        Evento* cualevento = nullptr;
+
+        for(int i = 0; i < TotalEventos; i++){
+            if(!ListaEventos[i]->usado){
+                suma += ListaEventos[i]->probabilidad;
+                if(random_num <= suma && cualevento == nullptr){
+                    cualevento = ListaEventos[i];
+                }
+            }
+        }
+
+        if(cualevento == nullptr){
+            cout << "-- " << h->nombre << " --" << endl;
+            cout << h->descripcion << endl;
+            cout << "\n¡Qué mal! No desbloqueaste el evento... suena miau miua miua\n" << endl;
+        } else{
+            cualevento->usado = true;
+            MostrarEvento(cualevento, jugador);
+        }
+        
     }else{
         cout << "-- " << h->nombre << " --" << endl;
         cout << h->descripcion << endl;
     }
 
-    if (h->hijo1 || h->hijo2 || h->hijo3){
-        cout << "A donde quieres ir?" << endl;
-        if (h->hijo1){
-            cout << "1. " << h->hijo1->nombre << endl;
-        }
-        if (h->hijo2){
+    if (JuegoActivo){
+        if (h->hijo1 || h->hijo2 || h->hijo3){
+            cout << "A donde quieres ir?" << endl;
+            if (h->hijo1){
+                cout << "1. " << h->hijo1->nombre << endl;
+            }
+            if (h->hijo2){
             cout << "2. " << h->hijo2->nombre << endl;
-        }
-        if (h->hijo3){
+            }
+            if (h->hijo3){
             cout << "3. " << h->hijo3->nombre << endl;
+            }
+            cout << "(Presiona la tecla correspondiente)" << endl;
         }
-        cout << "(Presiona la tecla correspondiente)" << endl;
     }
-}
-
-Habitacion *elegirHabitacion(Habitacion *h){
-    int opcion;
-    cin >> opcion;
-
-    if (opcion == 1 && h->hijo1){
-        return h->hijo1;
-    }else if (opcion == 2 && h->hijo2){
-        return h->hijo2;
-    }else if (opcion == 3 && h->hijo3){
-        return h->hijo3;
-    }else{
-        cout << "Opción inválida. Intenta de nuevo." << endl;
-        return h; // se queda en la misma habitación
-    }
-}
-
-
-int main(){
-    ifstream archivo;
-    archivo.open("ejemplo.map");
-    if (!archivo.is_open()){
-        cout << "No se pudo abrir el archivo" << endl;
-        return 0;
-    }
-    srand(time(nullptr));
     
-    //ELIMINAR LUEGO
-    cargarHabitaciones(archivo);
-    cargarArcos(archivo);
+}
+
+
+
+int main() {
+    ifstream archivo("data.map");
+    if (!archivo.is_open()) {
+        cerr << "Error: No se pudo abrir el archivo." << endl;
+        return 1;
+    }
+
+    srand(time(nullptr)); //Para que se vaya cambiando el núm q entrega la función rand cada vez q se reinicia el programa.
+
+    CargarHabitaciones(archivo);
+    CargarArcos(archivo);
     CargarEnemigos(archivo);
+    CargarEventos(archivo);
     cargaMejorasCombate(archivo);
 
-    Habitacion *habitacionActual = habitaciones[0]; // puntero a la habitacion inicial
+    Habitacion* habitacionActual = ListaHabitaciones[0];
+    
 
-    while (juegoActivo){
+    while (JuegoActivo) {
         mostrarHabitacion(habitacionActual, jugador);
-
-        if (habitacionActual->tipo == "FIN"){
-            juegoActivo = false; // Detiene el ciclo
-        }else{
+        
+        if (habitacionActual->tipo == "FIN") {
+            JuegoActivo = false;
+        }
+        if (JuegoActivo){
             habitacionActual = elegirHabitacion(habitacionActual);
             cout << endl;
         }
     }
 
-    // Liberar memoria
-    for (int i = 0; i < totalHabitaciones; i++){
-        delete habitaciones[i];
+    for (int i = 0; i < TotalHabitaciones; i++) {
+        delete ListaHabitaciones[i];
     }
-    delete[] habitaciones;
+    delete[] ListaHabitaciones;
 
-    for (int i = 0; i < TotalEnemigos; ++i){
+    for (int i = 0; i < TotalEnemigos; i++) {
         delete ListaEnemigos[i];
     }
     delete[] ListaEnemigos;
+
+    for (int i = 0; i < TotalEventos; i++) {
+        delete ListaEventos[i];
+    }
+    delete[] ListaEventos;
 
     for (int i = 0; i < TotalMejoras; ++i){
         delete ListaMejoras[i];
     }
     delete[] ListaMejoras;
-
-    
 
     return 0;
 }
