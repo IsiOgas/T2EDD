@@ -424,7 +424,7 @@ void SucedeEvento(Habitacion* H){
 
 
 int main() {
-    ifstream archivo("ejemplo.map");
+    ifstream archivo("data.map");
     if (!archivo.is_open()) {
         cerr << "Error: No se pudo abrir el archivo." << endl;
         return 1;

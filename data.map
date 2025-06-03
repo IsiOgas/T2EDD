@@ -1,2 +1,110 @@
+INICIO DE ARCHIVO
 HABITACIONES
-
+15
+0;Pueblo Paleta;INICIO;Despiertas en tu habitación. Hoy comenzará tu aventura Pokémon, aunque nada es como pensabas.
+1;Laboratorio;EVENTO;El profesor Oak te recibe con una advertencia, ahora los Pokémon te pueden atacar... ¡TEN CUIDADO!
+2;Ruta 01;COMBATE;Te adentras en la hierba alta, algo se mueve entre los arbustos...
+3;Cueva Diglett;EVENTO;Un eco inquietante resuena entre las paredes. Sientes una presencia desde la oscuridad...
+4;Bosque Verde;COMBATE;Ruidos extraños resuenan entre los árboles es hora de pelear!
+5;Monte Moon;EVENTO;Las paredes brillan con cristales antiguos, pero notas algo extraño.
+6;Ciudad Verde;EVENTO;Caminando por la ciudad, aparece algo misterioso.
+7;Ciudad Azulona;FIN;Entras al casino y te absorbe la ludopatía. Nunca más sales de ahí, despídete de tu aventura.
+8;Pueblo Lavanda;FIN;Luego de escuchar la canción del Pueblo Lavanda, recuerdas cuando veías creepypastas y te desmayas.
+9;Centro Pokémon Abandonado;FIN;Está vacío... así que te pones a dormir.
+10;Isla Espuma;FIN;Un resbalón en el hielo te lanza directo al olvido.
+11;Cueva Mewtwo;FIN;Luego de que Mewtwo te ve entrar solo y sin un Pokémon, te invita a una taza de té y te das cuenta que solo quería un amigo... :,)
+12;Equipo Rocket;FIN;Has entrado en la base secreta del Equipo Rocket. Sus planes oscuros te atrapan y no hay forma de salir.
+13;Calle Victoria;EVENTO;Mientras recorres las profundidades de las cuevas, ves a lo lejos algo extraño.
+14;Liga Pokémon;FIN;No te dejan competir porque no tienes medallas, así que te quedas llorando en una esquina.
+ARCOS
+14
+0 -> 1
+0 -> 2
+1 -> 4
+1 -> 10
+2 -> 5
+2 -> 6
+4 -> 3
+4 -> 7
+3 -> 8
+3 -> 9
+5 -> 11
+6 -> 12
+6 -> 13
+13 -> 14
+ENEMIGOS
+4
+Pidgey | Vida 10 | Ataque 3 | Precision 0.7 | Probabilidad 0.3
+Psyduck | Vida 15 | Ataque 4 | Precision 0.5 | Probabilidad 0.3
+Eevee | Vida 20 | Ataque 5 | Precision 0.6 | Probabilidad 0.2
+Mew | Vida 100 | Ataque 10 | Precision 0.9 | Probabilidad 0.1
+EVENTOS
+4
+&
+Pokébola
+Probabilidad 0.2
+Te encuentras una Pokébola vieja tirada en medio del camino.
+2
+A
+La recoges sin pensarlo.
+Sale un Chansey y te cura.
++10 Vida
+B
+La dejas.
+Mejor no tocarla, parece una trampa.
+Evitas una posible trampa, pero no ganas nada.
+&
+Pikachu
+Probabilidad 0.3
+Encuentras un Pikachu buena onda, te ofrece una baya.
+3
+A
+La aceptas.
+El Pikachu era un Mimikyu... ¡menudo fake fan! el terror afecta tu mente.
+-0.2 PRECISIÓN
+B
+No la aceptas.
+El Pikachu te desprecia con la mirada y se va.
++3 Vida
+C
+Hacen un duelo de miradas.
+El Pikachu se duerme.
++5 Ataque
+&
+Piedra Agua
+Probabilidad 0.1
+Encuentras una Piedra Agua en el camino.
+2
+A
+Te la quedas por si encuentras un Vaporeon.
+Que cosas piensas...
+-10 Ataque
+B
+Solo la miras.
+De tanto mirarla tu vista se fortalece.
++0.3 PRECISIÓN
+&
+Snorlax Dormido
+Probabilidad 0.4
+Un Snorlax bloquea el camino. Ronca tan fuerte que el suelo tiembla.
+3
+A
+Intentas despertarlo con una Pokéflauta.
+Snorlax abre un ojo, sonríe... y te aplasta.
+-5 Vida
+B
+Le dejas un Caramelo Raro en la panza y te vas.
+Snorlax se pone feliz y mueve la cola, abriendo un nuevo camino.
++10 Ataque
+C
+Te sientas a dormir a su lado.
+Sueñas con combates épicos y te levantas con energía.
++3 Vida
+&
+MEJORAS DE COMBATE
+4
++5 Vida
++0.3 Precision
++3 Ataque
++2 Recuperacion
+FIN DE ARCHIVO

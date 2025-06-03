@@ -710,8 +710,11 @@ void mostrarHabitacion(Habitacion *h, Jugador &jugador){
     if (h->id == 0){
         cout << "-- Habitación Inicial --" << endl;
         cout << h->descripcion << endl;
-    }else if (h->tipo == "COMBATE" && !h->enemigosAsignados){
 
+    }else if (h->tipo == "COMBATE" && !h->enemigosAsignados){
+        cout << "-- " << h->nombre << " --" << endl;
+        cout << h->descripcion << endl;
+        cout << "\n" << endl;
         AparicionEnemigos(h, ListaEnemigos, TotalEnemigos);
 
         if (h->cantidadEnemigosAsignados == 1){
@@ -720,12 +723,16 @@ void mostrarHabitacion(Habitacion *h, Jugador &jugador){
             cout << "¡Te enfrentas a dos monstruos: " << h->enemigos[0]->nombre << " y " << h->enemigos[1]->nombre << "!" << endl;
         }
 
+        cout << "-------------------------" << endl;
         mostrarEstado(jugador, h);
         cout << "-------------------------" << endl;
         cout << endl;
         turnoCombate(jugador, h);
         cout<<endl;
     }else if(h->tipo == "EVENTO"){
+        cout << "-- " << h->nombre << " --" << endl;
+        cout << h->descripcion << endl;
+        cout << "\n" << endl;
         float random_num = (rand() % 1000)/1000.0; //no supe como hacer del 0 al 1 asi q ese es del 0 a al 0.999
         float suma = 0;
         Evento* cualevento = nullptr;
@@ -771,7 +778,7 @@ void mostrarHabitacion(Habitacion *h, Jugador &jugador){
 
 
 int main() {
-    ifstream archivo("ejemplo.map");
+    ifstream archivo("data.map");
     if (!archivo.is_open()) {
         cerr << "Error: No se pudo abrir el archivo." << endl;
         return 1;
