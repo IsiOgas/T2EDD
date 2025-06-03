@@ -524,6 +524,18 @@ void cargaMejorasCombate(ifstream &archivo){
     }
 }
 
+/******
+*   void CargarEventos
+******
+*   Carga los datos de enemigos desde un archivo y los almacena en memoria.
+******
+* Input:
+*   ifstream& archivo : archivo de entrada con los datos de los archivos.
+******
+* Returns:
+*   void, no retorna nada -> modifica la variable global ListaEventos.
+*****/
+
 void CargarEventos(ifstream& archivo){
     string linea;
     while(getline(archivo,linea) && linea !="EVENTOS");
@@ -566,10 +578,12 @@ void CargarEventos(ifstream& archivo){
 *   la misma habitación y en las siguientes si tiene vida igual a 0
 ******
 * Input:
-*   Habitacion* H : Puntero a la habitacion que se desea aparecer un enemigo.
+*   Habitacion* h :habitación objetivo
+*   Enemigo* ListaEnemigos[] : arreglo global de enemigos
+*   int TotalEnemigos : cantidad total de enemigos disponibles
 ******
 * Returns:
-*   void, no retorna nada -> modifica las variables enemigos[] y cantidadEnemigosAsignados de la habitación.
+*   void, no retorna nada -> Modifica h->enemigos[] y h->cantidadEnemigosAsignados, además establece h->enemigosAsignados = true
 *****/
 
 void AparicionEnemigos(Habitacion* h, Enemigo* ListaEnemigos[], int TotalEnemigos){
@@ -606,6 +620,19 @@ void AparicionEnemigos(Habitacion* h, Enemigo* ListaEnemigos[], int TotalEnemigo
         h->enemigosAsignados = true;
 }
 
+/******
+*   void AplicarResultado
+******
+*   Procesa un string de resultado y aplica modificadores
+*   a las estadísticas del jugador.
+******
+* Input:
+*   string resultado : string con formato "valor ESTADISTICA" (ej: "0.2 PRECISION")
+*   Jugador& jugador : referencia al objeto jugador a modificar.
+* Returns:
+*   void, no retorna nada -> modifica directamente al jugador.
+*****/
+
 void AplicarResultado(string resultado, Jugador& jugador){
     stringstream result(resultado);
     string caracteristicas;
@@ -624,6 +651,18 @@ void AplicarResultado(string resultado, Jugador& jugador){
     }
 }
 
+/******
+*   Habitacion* elegirHabitacion
+******
+*   permite al jugador seleccionar una habitación adyacente (1-3)
+*   mediante entrada por consola, con validación de opciones.
+******
+* Input:
+*   Habitacion* h : habitación actual con sus hijos (hijo1, hijo2, hijo3)
+******
+* Returns:
+*   Habitacion* : puntero a la habitación seleccionada.
+*****/
 
 Habitacion *elegirHabitacion(Habitacion *h){
     char opcion;
@@ -650,6 +689,20 @@ Habitacion *elegirHabitacion(Habitacion *h){
     }
     return h; 
 }
+
+/******
+*   void MostrarEvento
+******
+*   muestra un evento y aplica modificaciones al jugador según su elección.
+******
+* Input:
+*   Evento* CualEvento : puntero al evento a mostrar
+*   Jugador& jugador : referencia al jugador afectado
+******
+* Returns:
+*   void - No retorna valores -> Modifica las stats del jugador (vida/ataque/precisión/recuperación),
+*   produce salida por consola, cambia el estado del juego según elección
+*****/
 
 void MostrarEvento(Evento* CualEvento, Jugador& jugador){
     cout << "--- Evento: " << CualEvento->nombre << " ---\n";
