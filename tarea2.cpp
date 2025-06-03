@@ -37,6 +37,7 @@ struct Habitacion{
 };
 
 struct UpgradeCombate{
+    //inicializado en 0
     int vida=0;
     float precision=0.0;
     int ataque=0;
@@ -74,7 +75,7 @@ class Jugador{
 };
 
 
-// funciones para TDA Cola
+// Para TDA Cola
 class TDACola{
     private:
         Nodo *head;
@@ -168,6 +169,19 @@ Evento** ListaEventos = nullptr;
 int TotalEventos = 0; 
 
 
+/******
+*   bool hayEnemigosVivos
+******
+*   Recorre los enemigos asignados a una habitación y verifica si al menos uno de ellos
+*   sigue con vida. 
+*
+******
+* Input:
+*   Habitacion *h : Puntero a la habitación actual.ADJ_OFFSET_SINGLESHOT
+******
+* Returns:
+*   bool -> true si hay al menos un enemigo con vida mayor a 0, false en caso contrario.
+*****/
 
 bool hayEnemigosVivos(Habitacion *h){
     for (int i = 0; i < h->cantidadEnemigosAsignados; i++){
@@ -178,7 +192,22 @@ bool hayEnemigosVivos(Habitacion *h){
     return false;
 }
 
-
+/******
+*   void mostrarEstado
+******
+*   Muestra el estado actual del jugador y los enemigos presentes en la habitación.
+*   Imprime una línea con los nombres del jugador y los enemigos asignados,
+*   seguida de otra línea con sus respectivas vidas. Si alguno tiene vida menor o igual a 0,
+*   se muestra con una "X" para indicar que está derrotado.
+*
+******
+* Input:
+*   Jugador &jugador      : Referencia al jugador actual del juego.
+*   Habitacion *h         : Puntero a la habitación actual.
+******
+* Returns:
+*   void, no retorna nada -> solo imprime en pantalla el estado actual de los personajes.
+*****/
 
 void mostrarEstado(Jugador &jugador, Habitacion *h){
     // Mostrar nombres
@@ -204,7 +233,24 @@ void mostrarEstado(Jugador &jugador, Habitacion *h){
     cout << endl;
 }
 
-
+/******
+*   void mostrarMejorasCombate
+******
+*   Si se gana el combate, se muestran dos mejoras aleatorias al jugador, se permite elegir una
+*   y aplicar sus efectos (vida, ataque, precisión o recuperación).
+*
+*   Las mejoras se seleccionan al azar del arreglo ListaMejoras.
+*
+******
+* Input:
+*   Jugador &jugador                : Referencia al jugador que recibirá la mejora.
+*   UpgradeCombate* ListaMejoras[]  : Arreglo de punteros a mejoras de combate disponibles.
+*   int TotalMejoras                : Cantidad total de mejoras disponibles en el arreglo.
+******
+* Returns:
+*   void, no retorna nada -> modifica los atributos del jugador dependiendo
+*          de la mejora elegida (vida, ataque, precisión o recuperación).
+*****/
 
 void mostrarMejorasCombate(Jugador &jugador, UpgradeCombate* ListaMejoras[], int TotalMejoras){
 
@@ -213,9 +259,6 @@ void mostrarMejorasCombate(Jugador &jugador, UpgradeCombate* ListaMejoras[], int
     do {    //Hacer(Buscar en este caso) Mejora 2 mientras Mejora 2 es igual a Mejora 1. Aqui buscando que M1 sea distinta de M2
         MejCom2 = rand() % TotalMejoras;
     } while (MejCom2 == MejCom1);
-
-    //ELIMINAR LUEGO
-    cout << "Mejora indices: " << MejCom1 << ", " << MejCom2 << endl;
 
     UpgradeCombate* mejora1 = ListaMejoras[MejCom1]; //Punteros a las mejoras seleccionadas 
     UpgradeCombate* mejora2 = ListaMejoras[MejCom2];
@@ -282,19 +325,22 @@ void mostrarMejorasCombate(Jugador &jugador, UpgradeCombate* ListaMejoras[], int
         jugador.setRecuperacion(jugador.getRecuperacion() + elegida->recuperacion);
         cout << "¡Aumentaste tu recuperación en " << elegida->recuperacion << "!" << endl;
     }
-    //BORRAR
-    cout << "Estado actual del jugador:" << endl;
-            cout << "Vida: " << jugador.getVida() << endl;
-            cout << "Ataque: " << jugador.getAtaque() << endl;
-            cout << "Precisión: " << jugador.getPrecision() << endl;
-            cout << "Recuperación: " << jugador.getRecuperacion() << endl;
-            cout << "-------------------------------" << endl;
-
-    cout << endl;
-
 
 }
 
+/******
+*   void turnoCombate
+******
+*   Realiza un turno de combate entre el jugador y los enemigos asignados en la habitación.
+******
+* Input:
+*   Jugador &jugador : referencia al objeto jugador que participa en el combate.
+*   Habitacion *h    : puntero a la habitación donde ocurre el combate.
+******
+* Returns:
+*   void, no retorna nada -> modifica el estado de la variable global ListaMejoras si el jugador gana el combate y si pierde
+*   muestra un mensaje de "Game Over".
+*****/
 
 void turnoCombate(Jugador &jugador, Habitacion *h){
     TDACola colaTurnos;
@@ -309,7 +355,7 @@ void turnoCombate(Jugador &jugador, Habitacion *h){
         string turnoActual = colaTurnos.TurnoSgte();
         bool huboAccion = false;
         if (turnoActual == "Jugador"){
-            // === Turno del jugador ===
+            // Turno del jugador
             for (int i = 0; i < h->cantidadEnemigosAsignados; i++){
                 if (h->enemigos[i]->vida > 0){
                     if ((rand() % 1000) / 1000.0f <= jugador.getPrecision()){
@@ -323,7 +369,7 @@ void turnoCombate(Jugador &jugador, Habitacion *h){
                 }
             }
         }else{
-            // === Turno de un enemigo ===
+            // Turno de un enemigo
             for (int i = 0; i < h->cantidadEnemigosAsignados; i++){
                 if (h->enemigos[i]->nombre == turnoActual && h->enemigos[i]->vida > 0){
                     if ((rand() % 1000) / 1000.0f <= h->enemigos[i]->precision){
@@ -357,7 +403,6 @@ void turnoCombate(Jugador &jugador, Habitacion *h){
             
     }
 }
-
 
 /******
 *   void CargarHabitaciones
@@ -439,7 +484,6 @@ void CargarArcos(ifstream& archivo) {
     }
 }
 
-
 /******
 *   void CargarEnemigos
 ******
@@ -482,6 +526,19 @@ void CargarEnemigos(ifstream& archivo){
     }
 }
 
+/******
+*   void cargaMejorasCombate
+******
+*   Lee desde un archivo las mejoras de combate disponibles para el jugador y
+*   luego los guarda en un arreglo global.
+*
+******
+* Input:
+*   ifstream &archivo : archivo de entrada con los datos de las mejoras de combate.
+******
+* Returns:
+*   void, no retorna nada -> modifica la variable global ListaMejoras.
+*****/
 
 void cargaMejorasCombate(ifstream &archivo){
     string linea;
@@ -491,23 +548,16 @@ void cargaMejorasCombate(ifstream &archivo){
     TotalMejoras = stoi(linea);
     ListaMejoras= new UpgradeCombate*[TotalMejoras];
 
-    //ELIMINAR LUEGO
-   // cout<< "Cantidad mejoras a leer: "<<TotalMejoras<<endl;
-
     for(int i=0; i<TotalMejoras; i++){
         UpgradeCombate* mejora = new UpgradeCombate();
         getline(archivo,linea); //Estamos en 1er mejora.
-
-        
-        
-       // cout<< "Linea a leer: "<<linea<<endl;
 
         stringstream Mejora(linea); 
         string tipo;
         float valor;
         char signo;
 
-        Mejora >> signo >> valor >> tipo; // +4
+        Mejora >> signo >> valor >> tipo; // +4 Vida
 
         if (tipo == "Vida" || tipo == "vida"){
             mejora->vida = (int)valor;
@@ -654,7 +704,7 @@ void AplicarResultado(string resultado, Jugador& jugador){
 /******
 *   Habitacion* elegirHabitacion
 ******
-*   permite al jugador seleccionar una habitación adyacente (1-3)
+*   Permite al jugador seleccionar una habitación adyacente (1-3)
 *   mediante entrada por consola, con validación de opciones.
 ******
 * Input:
@@ -693,7 +743,7 @@ Habitacion *elegirHabitacion(Habitacion *h){
 /******
 *   void MostrarEvento
 ******
-*   muestra un evento y aplica modificaciones al jugador según su elección.
+*   Muestra un evento y aplica modificaciones al jugador según su elección.
 ******
 * Input:
 *   Evento* CualEvento : puntero al evento a mostrar
@@ -755,6 +805,24 @@ void MostrarEvento(Evento* CualEvento, Jugador& jugador){
     }
 }
 
+/******
+*   void mostrarHabitacion
+******
+*   Muestra la información de la habitación actual del jugador, según el 
+*   tipo de habitación: inicial, combate o evento.
+*   En habitaciones de combate se activa el sistema de turnos y se generan enemigos.
+*   En habitaciones de evento se selecciona aleatoriamente un evento no usado.
+*   Por último, permite al jugador elegir a qué habitación ir después, si es que hay caminos disponibles.
+
+******
+* Input:
+*   Habitacion *h : Puntero a la habitación actual donde se encuentra el jugador.
+*   Jugador &jugador : Referencia al jugador
+******
+* Returns:
+*   void, no retorna nada -> Muestra información por pantalla, ejecuta eventos o combates,
+*          y modifica el estado global JuegoActivo si el jugador muere.
+*****/
 
 void mostrarHabitacion(Habitacion *h, Jugador &jugador){
 
@@ -831,7 +899,6 @@ void mostrarHabitacion(Habitacion *h, Jugador &jugador){
 }
 
 
-
 int main() {
     ifstream archivo("data.map");
     if (!archivo.is_open()) {
@@ -846,6 +913,7 @@ int main() {
     CargarEnemigos(archivo);
     CargarEventos(archivo);
     cargaMejorasCombate(archivo);
+    archivo.close();
 
     Habitacion* habitacionActual = ListaHabitaciones[0];
     
@@ -861,7 +929,7 @@ int main() {
             cout << endl;
         }
     }
-
+    
     for (int i = 0; i < TotalHabitaciones; i++) {
         delete ListaHabitaciones[i];
     }
